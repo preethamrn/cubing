@@ -1,44 +1,51 @@
 <template>
   <v-content :style="{ paddingTop: 0 }" v-scroll='onScroll'>
-    <v-toolbar dense :flat='toolbarFlat' :color='toolbarColor' app>
-      <v-toolbar-title class='headline text-uppercase'>
-        <v-layout>
-          <a href='#about-me'><span class='font-weight-light toolbar-link'>ABOUT ME</span></a>
-          <span class='font-weight-light toolbar-link'>EXPERIENCE</span>
-          <span class='font-weight-light toolbar-link'>PORTFOLIO</span>
-        </v-layout>
-      </v-toolbar-title>
+    <v-toolbar dense :flat='toolbarFlat' :color='toolbarColor'>
+      <!--<v-toolbar-title class='headline'>
+        <span class='toolbar-header'> p </span>
+      </v-toolbar-title>-->
+      <v-layout>
+        <v-flex offset-md3 offset-xs0 xs2>
+          <a :style="{ 'height': '100%' }" href='#about-me'>
+            <v-btn flat class='font-weight-light toolbar-link'>ABOUT ME</v-btn>
+          </a>
+        </v-flex>
+        <v-flex xs2>
+          <a :style="{ 'height': '100%' }" href='#experience'>
+            <v-btn flat class='font-weight-light toolbar-link'>EXPERIENCE</v-btn>
+          </a>
+        </v-flex>
+        <v-flex xs2>
+          <a :style="{ 'height': '100%' }" href='#portfolio'>
+            <v-btn flat class='font-weight-light toolbar-link'>PORTFOLIO</v-btn>
+          </a>
+        </v-flex>
+      </v-layout>
       <v-spacer></v-spacer>
       TODO: icons
     </v-toolbar>
 
-    <v-layout id='title'>
-      <v-card dark flat class='title-card'>
-        title
-      </v-card>
-    </v-layout>
+    <TitleCard />
     <v-container>
-      <v-layout id='about-me'>
-        <v-card flat class='anchor-content'>
-          about me
-        </v-card>
-      </v-layout>
-      <v-layout>
-        <v-card flat class='anchor-content'>
-          experience
-        </v-card>
-      </v-layout>
-      <v-layout>
-        <v-card flat class='anchor-content'>
-          portfolio
-        </v-card>
-      </v-layout>
+      <AboutMeCard />
+      <ExperienceCard />
+      <PortfolioCard />
     </v-container>
   </v-content>
 </template>
 
 <script>
+  import TitleCard from '@/components/TitleCard'
+  import AboutMeCard from '@/components/AboutMeCard'
+  import ExperienceCard from '@/components/ExperienceCard'
+  import PortfolioCard from '@/components/PortfolioCard'
   export default {
+    components: {
+      TitleCard,
+      AboutMeCard,
+      ExperienceCard,
+      PortfolioCard
+    },
     data: () => ({
       offsetTop: 0,
       toolbarColor: "rgba(0, 0, 0, 0)",
@@ -65,17 +72,27 @@
   top: 0;
   z-index: 64;
 }
+.v-toolbar__title.headline {
+  font-family: "Lucida Console", Monaco, monospace !important
+}
 .toolbar-link {
   padding-right: 1em;
-  font-size: 0.5em;
+  font-size: 1em;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0px 8px;
+  height: '100%'
 }
 
-.v-card.anchor-content {
+.layout.anchor-content {
   margin-top: 150px;
   height: 500px;
 }
-.v-card.title-card {
+.layout.title-card {
   width: 100vw;
   height: 100vh;
+}
+
+a {
+  text-decoration: none;
 }
 </style>
