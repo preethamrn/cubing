@@ -1,5 +1,6 @@
 <template>
-  <v-layout id='title' class='title-card'>
+  <v-layout id='title' style='background:url(intro-bg.jpg)' class='title-card'>
+
     title
   </v-layout>
 </template>
