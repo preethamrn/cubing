@@ -1,147 +1,81 @@
 <template>
-  <v-container>
-    <v-layout
-      text-xs-center
-      wrap
-    >
-      <v-flex xs12>
-        <v-img
-          :src="require('../assets/logo.svg')"
-          class="my-3"
-          contain
-          height="200"
-        ></v-img>
-      </v-flex>
-
-      <v-flex mb-4>
-        <h1 class="display-2 font-weight-bold mb-3">
-          Welcome to Vuetify
-        </h1>
-        <p class="subheading font-weight-regular">
-          For help and collaboration with other Vuetify developers,
-          <br>please join our online
-          <a href="https://community.vuetifyjs.com" target="_blank">Discord Community</a>
-        </p>
-      </v-flex>
-
-      <v-flex
-        mb-5
-        xs12
-      >
-        <h2 class="headline font-weight-bold mb-3">What's next?</h2>
-
-        <v-layout justify-center>
-          <a
-            v-for="(next, i) in whatsNext"
-            :key="i"
-            :href="next.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ next.text }}
-          </a>
+  <v-content :style="{ paddingTop: 0 }" v-scroll='onScroll'>
+    <v-toolbar dense :flat='toolbarFlat' :color='toolbarColor' app>
+      <v-toolbar-title class='headline text-uppercase'>
+        <v-layout>
+          <a href='#about-me'><span class='font-weight-light toolbar-link'>ABOUT ME</span></a>
+          <span class='font-weight-light toolbar-link'>EXPERIENCE</span>
+          <span class='font-weight-light toolbar-link'>PORTFOLIO</span>
         </v-layout>
-      </v-flex>
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+      TODO: icons
+    </v-toolbar>
 
-      <v-flex
-        xs12
-        mb-5
-      >
-        <h2 class="headline font-weight-bold mb-3">Important Links</h2>
-
-        <v-layout justify-center>
-          <a
-            v-for="(link, i) in importantLinks"
-            :key="i"
-            :href="link.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ link.text }}
-          </a>
-        </v-layout>
-      </v-flex>
-
-      <v-flex
-        xs12
-        mb-5
-      >
-        <h2 class="headline font-weight-bold mb-3">Ecosystem</h2>
-
-        <v-layout justify-center>
-          <a
-            v-for="(eco, i) in ecosystem"
-            :key="i"
-            :href="eco.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ eco.text }}
-          </a>
-        </v-layout>
-      </v-flex>
+    <v-layout id='title'>
+      <v-card dark flat class='title-card'>
+        title
+      </v-card>
     </v-layout>
-  </v-container>
+    <v-container>
+      <v-layout id='about-me'>
+        <v-card flat class='anchor-content'>
+          about me
+        </v-card>
+      </v-layout>
+      <v-layout>
+        <v-card flat class='anchor-content'>
+          experience
+        </v-card>
+      </v-layout>
+      <v-layout>
+        <v-card flat class='anchor-content'>
+          portfolio
+        </v-card>
+      </v-layout>
+    </v-container>
+  </v-content>
 </template>
 
 <script>
   export default {
     data: () => ({
-      ecosystem: [
-        {
-          text: 'vuetify-loader',
-          href: 'https://github.com/vuetifyjs/vuetify-loader'
-        },
-        {
-          text: 'github',
-          href: 'https://github.com/vuetifyjs/vuetify'
-        },
-        {
-          text: 'awesome-vuetify',
-          href: 'https://github.com/vuetifyjs/awesome-vuetify'
+      offsetTop: 0,
+      toolbarColor: "rgba(0, 0, 0, 0)",
+      toolbarFlat: true
+    }),
+    methods: {
+      onScroll () {
+        this.offsetTop = window.pageYOffset || document.documentElement.scrollTop
+        if (this.offsetTop > window.innerHeight - 100) {
+          this.toolbarColor= "rgba(255, 255, 255, 0.5)",
+          this.toolbarFlat= false
+        } else {
+          this.toolbarColor= "rgba(0, 0, 0, 0)",
+          this.toolbarFlat= true
         }
-      ],
-      importantLinks: [
-        {
-          text: 'Documentation',
-          href: 'https://vuetifyjs.com'
-        },
-        {
-          text: 'Chat',
-          href: 'https://community.vuetifyjs.com'
-        },
-        {
-          text: 'Made with Vuetify',
-          href: 'https://madewithvuetifyjs.com'
-        },
-        {
-          text: 'Twitter',
-          href: 'https://twitter.com/vuetifyjs'
-        },
-        {
-          text: 'Articles',
-          href: 'https://medium.com/vuetify'
-        }
-      ],
-      whatsNext: [
-        {
-          text: 'Explore components',
-          href: 'https://vuetifyjs.com/components/api-explorer'
-        },
-        {
-          text: 'Select a layout',
-          href: 'https://vuetifyjs.com/layout/pre-defined'
-        },
-        {
-          text: 'Frequently Asked Questions',
-          href: 'https://vuetifyjs.com/getting-started/frequently-asked-questions'
-        }
-
-      ]
-    })
+      }
+    }
   }
 </script>
 
 <style>
+.v-toolbar {
+  position: fixed;
+  top: 0;
+  z-index: 64;
+}
+.toolbar-link {
+  padding-right: 1em;
+  font-size: 0.5em;
+}
 
+.v-card.anchor-content {
+  margin-top: 150px;
+  height: 500px;
+}
+.v-card.title-card {
+  width: 100vw;
+  height: 100vh;
+}
 </style>
