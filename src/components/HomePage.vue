@@ -96,7 +96,7 @@
 }
 
 .layout.anchor-content {
-  margin-top: 150px;
+  padding-top: 150px;
   height: 500px;
 }
 a {

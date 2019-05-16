@@ -25,4 +25,7 @@ export default {
   font-family: "Monument";
   src: url("./assets/MonumentExtended-Regular.otf");
 }
+html {
+  scroll-behavior: smooth;
+}
 </style>
