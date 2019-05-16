@@ -48,6 +48,7 @@ export default {
 .title-text {
   color: rgba(255, 255, 255, 1);
   font-size: 3em;
+  padding-bottom: 15%;
   font-family: "Lucida Console", Monaco, monospace !important;
 }
 

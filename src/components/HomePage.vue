@@ -5,6 +5,9 @@
         <span class='toolbar-header'> p </span>
       </v-toolbar-title>-->
       <v-layout>
+        <a :style="{ 'height': '100%' }" href='#'>
+          <v-icon>fas fa-home</v-icon>
+        </a>
         <v-flex offset-md3 offset-xs0 md2 xs3>
           <a :style="{ 'height': '100%' }" href='#about-me'>
             <v-btn flat :class='["font-weight-light", "toolbar-link"].concat(toolbarClass)'>ABOUT ME</v-btn>
@@ -96,7 +99,7 @@
 }
 
 .layout.anchor-content {
-  margin-top: 150px;
+  padding-top: 150px;
   height: 500px;
 }
 a {
