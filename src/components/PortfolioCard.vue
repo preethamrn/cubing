@@ -1,5 +1,5 @@
 <template>
-  <v-layout id='portfolio' class='anchor-content'>
+  <v-layout id='portfolio' class='anchor-content portfolio-content'>
     portfolio
   </v-layout>
 </template>
@@ -13,6 +13,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+.portfolio-content {
+  background-color: rgb(236, 236, 236)
+}
 </style>

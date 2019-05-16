@@ -34,7 +34,7 @@
     </v-toolbar>
 
     <TitleCard />
-    <v-container>
+    <v-container fluid>
       <AboutMeCard />
       <ExperienceCard />
       <PortfolioCard />
@@ -98,6 +98,9 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+.container {
+  padding: 0;
+}
 .layout.anchor-content {
   padding-top: 150px;
   height: 500px;

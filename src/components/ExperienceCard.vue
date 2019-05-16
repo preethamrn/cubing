@@ -1,5 +1,5 @@
 <template>
-  <v-layout id='experience' class='anchor-content'>
+  <v-layout id='experience' class='anchor-content experience-content'>
     experience
   </v-layout>
 </template>
@@ -13,6 +13,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+.experience-content {
+  background-color: rgb(211, 211, 211)
+}
 </style>
