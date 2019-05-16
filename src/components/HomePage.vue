@@ -99,10 +99,6 @@
   margin-top: 150px;
   height: 500px;
 }
-.layout.title-card {
-  width: 100vw;
-  height: 100vh;
-}
 a {
   text-decoration: none;
 }

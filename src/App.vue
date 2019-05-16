@@ -19,3 +19,10 @@ export default {
   }
 }
 </script>
+
+<style>
+@font-face {
+  font-family: "Monument";
+  src: url("./assets/MonumentExtended-Regular.otf");
+}
+</style>
