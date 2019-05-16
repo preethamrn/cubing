@@ -23,10 +23,10 @@
       </v-layout>
       <v-spacer></v-spacer>
       <v-layout>
-        <v-flex md1 xs3><v-icon :dark='top'>fab fa-github</v-icon></v-flex>
-        <v-flex md1 xs3><v-icon :dark='top'>fab fa-linkedin</v-icon></v-flex>
-        <v-flex md1 xs3><v-icon :dark='top'>fab fa-instagram</v-icon></v-flex>
-        <v-flex md1 xs3><v-icon :dark='top'>fab fa-youtube</v-icon></v-flex>
+        <v-flex md1 xs3><a href='https://github.com/preethamrn' target='_blank'><v-icon :dark='top'>fab fa-github</v-icon></a></v-flex>
+        <v-flex md1 xs3><a href='https://www.linkedin.com/in/preethamrn' target='_blank'><v-icon :dark='top'>fab fa-linkedin</v-icon></a></v-flex>
+        <v-flex md1 xs3><a href='https://www.instagram.com/preethamrn' target='_blank'><v-icon :dark='top'>fab fa-instagram</v-icon></a></v-flex>
+        <v-flex md1 xs3><a href='https://www.youtube.com/channel/UC7tKYiFtH_6HCBD4hh7hTWw' target='_blank'><v-icon :dark='top'>fab fa-youtube</v-icon></a></v-flex>
       </v-layout>
     </v-toolbar>
 

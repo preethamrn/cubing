@@ -6,7 +6,7 @@
         style='margin-top: 33%'
         color='grey lighten-4'
       >
-        <img src='https://vuetifyjs.com/apple-touch-icon-180x180.png' alt='avatar'>
+        <img src='../assets/profile-pic.jpg' alt='avatar'>
       </v-avatar>
     </v-flex>
     <v-flex md6 xs12 text-xs-center text-md-left>
