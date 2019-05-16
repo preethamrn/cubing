@@ -5,24 +5,29 @@
         <span class='toolbar-header'> p </span>
       </v-toolbar-title>-->
       <v-layout>
-        <v-flex offset-md3 offset-xs0 xs2>
+        <v-flex offset-md3 offset-xs0 md2 xs3>
           <a :style="{ 'height': '100%' }" href='#about-me'>
             <v-btn flat :class='["font-weight-light", "toolbar-link"].concat(toolbarClass)'>ABOUT ME</v-btn>
           </a>
         </v-flex>
-        <v-flex xs2>
+        <v-flex md2 xs3>
           <a :style="{ 'height': '100%' }" href='#experience'>
             <v-btn flat :class='["font-weight-light", "toolbar-link"].concat(toolbarClass)'>EXPERIENCE</v-btn>
           </a>
         </v-flex>
-        <v-flex xs2>
+        <v-flex md2 xs3>
           <a :style="{ 'height': '100%' }" href='#portfolio'>
             <v-btn flat :class='["font-weight-light", "toolbar-link"].concat(toolbarClass)'>PORTFOLIO</v-btn>
           </a>
         </v-flex>
       </v-layout>
       <v-spacer></v-spacer>
-      TODO: icons
+      <v-layout>
+        <v-flex md1 xs3><v-icon :dark='top'>fab fa-github</v-icon></v-flex>
+        <v-flex md1 xs3><v-icon :dark='top'>fab fa-linkedin</v-icon></v-flex>
+        <v-flex md1 xs3><v-icon :dark='top'>fab fa-instagram</v-icon></v-flex>
+        <v-flex md1 xs3><v-icon :dark='top'>fab fa-youtube</v-icon></v-flex>
+      </v-layout>
     </v-toolbar>
 
     <TitleCard />
@@ -48,6 +53,7 @@
     },
     data: () => ({
       offsetTop: 0,
+      top: true,
       toolbarClass: ['elevation-0', 'top']
     }),
     methods: {
@@ -55,8 +61,10 @@
         this.offsetTop = window.pageYOffset || document.documentElement.scrollTop
         if (this.offsetTop > window.innerHeight - 100) {
           this.toolbarClass = []
+          this.top = false;
         } else {
           this.toolbarClass = ['elevation-0', 'top']
+          this.top = true;
         }
       }
     }
