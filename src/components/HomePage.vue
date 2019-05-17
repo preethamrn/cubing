@@ -5,7 +5,7 @@
         <span class='toolbar-header'> p </span>
       </v-toolbar-title>-->
       <v-layout>
-        <a :style="{ 'height': '100%' }" href='#'>
+        <a href='#'>
           <v-icon>fas fa-home</v-icon>
         </a>
         <v-flex offset-md3 offset-xs0 md2 xs3>
@@ -102,8 +102,16 @@
   padding: 0;
 }
 .layout.anchor-content {
-  padding-top: 150px;
-  height: 500px;
+  padding-top: 2em;
+  padding-bottom: 5em;
+}
+.header-underline {
+  height: 10px;
+  width: 150px;
+  background-color: rgba(255, 255, 255, 0.87);
+  right: 5px;
+  transform: translateX(5px);
+  margin-bottom: 16px;
 }
 a {
   text-decoration: none;
