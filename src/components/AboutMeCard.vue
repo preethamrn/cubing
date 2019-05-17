@@ -1,5 +1,5 @@
 <template>
-  <v-layout id='about-me' class='anchor-content'>
+  <v-layout id='about-me' class='anchor-content aboutme-content'>
     about me
   </v-layout>
 </template>
@@ -13,6 +13,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+.aboutme-content {
+  background-color: rgb(175, 175, 175)
+}
 </style>

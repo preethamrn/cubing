@@ -5,6 +5,9 @@
         <span class='toolbar-header'> p </span>
       </v-toolbar-title>-->
       <v-layout>
+        <a :style="{ 'height': '100%' }" href='#'>
+          <v-icon>fas fa-home</v-icon>
+        </a>
         <v-flex offset-md3 offset-xs0 md2 xs3>
           <a :style="{ 'height': '100%' }" href='#about-me'>
             <v-btn flat :class='["font-weight-light", "toolbar-link"].concat(toolbarClass)'>ABOUT ME</v-btn>
@@ -31,7 +34,7 @@
     </v-toolbar>
 
     <TitleCard />
-    <v-container>
+    <v-container fluid>
       <AboutMeCard />
       <ExperienceCard />
       <PortfolioCard />
@@ -95,6 +98,9 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+.container {
+  padding: 0;
+}
 .layout.anchor-content {
   padding-top: 150px;
   height: 500px;
