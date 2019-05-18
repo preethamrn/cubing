@@ -103,7 +103,7 @@
 }
 .layout.anchor-content {
   padding-top: 2em;
-  padding-bottom: 5em;
+  padding-bottom: 1em;
 }
 .header-underline {
   height: 10px;
