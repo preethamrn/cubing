@@ -1,5 +1,5 @@
 <template>
-  <v-layout row wrap id='title' :style="{ 'background':'url(\'intro-bg.jpg\')' }" class='title-card'>
+  <v-layout row wrap id='title' :style="{ 'background':'url(\'intro-bg2.jpg\') center' }" class='title-card'>
     <v-flex offset-md2 offset-xs0 md3 xs12 text-xs-center>
       <v-avatar
         :size='300'
