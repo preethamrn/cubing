@@ -74,5 +74,6 @@ export default {
 }
 .v-card.v-sheet {
   margin-bottom: 40px;
+  margin-right: 20px;
 }
 </style>
