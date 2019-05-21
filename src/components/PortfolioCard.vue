@@ -4,18 +4,37 @@
       <span class='anchor-header'>PORTFOLIO</span>
       <div class='header-underline'></div>
     </v-flex>
+    <v-flex offset-md3 offset-xs1 md5 xs10>
+      <v-combobox
+        v-model='portfolioFilter'
+        :items='[]'
+        label='Portfolio Filter (enter keywords)'
+        chips clearable solo multiple
+        @change='filter'
+      >
+        <template slot='selection' slot-scope='data'>
+          <v-chip
+            :selected='data.selected'
+            close
+            @input='removeItem(data.item)'
+          >
+            <strong>{{ data.item }}</strong>&nbsp;
+          </v-chip>
+        </template>
+      </v-combobox>
+    </v-flex>
     <v-flex offset-md3 offset-xs1 md6 xs10>
-      <v-layout row wrap>
-        <PortfolioItem v-for='item in items'
-          :key='item.name'
-          :name='item.name'
-          :image='item.image'
-          :technologies='item.technologies'
-          :links='item.links'
-          :timeRange='item.timeRange'
-          :description='item.description'
-        />
-      </v-layout>
+      <transition-group name='items-list' tag='div' class='container'>
+          <PortfolioItem v-for='item in items'
+            :key='item.name'
+            :name='item.name'
+            :image='item.image'
+            :technologies='item.technologies'
+            :links='item.links'
+            :timeRange='item.timeRange'
+            :description='item.description'
+          />
+      </transition-group>
     </v-flex>
   </v-layout>
 </template>
@@ -28,7 +47,9 @@ export default {
     PortfolioItem
   },
   data: () => ({
-    items: [{
+    items: [],
+    portfolioFilter: [],
+    fullPortolio: [{
         name: 'FooDrop',
         image: '../projects/foodrop.png',
         technologies: ['Javascript', 'Vue', 'Vuetify', 'Node.js', 'MongoDB', 'UML'],
@@ -169,7 +190,38 @@ export default {
         description: 'A calendar based note taking application in Android. Notes are color coded and unfinished tasks are carried from one day to the next.'
       }
     ]
-  })
+  }),
+  methods: {
+    shuffle () {
+      this.items = _.shuffle(this.items)
+    },
+    filter () {
+      this.items = []
+      if (this.portfolioFilter.length === 0) {
+        this.items = this.fullPortolio
+        return
+      }
+      for (let i=0; i < this.fullPortolio.length; i++) {
+        let filter = true
+        for (let j=0; j < this.portfolioFilter.length; j++) {
+          filter &= (
+            this.fullPortolio[i].technologies.some((tech) => tech.toLowerCase() === this.portfolioFilter[j].toLowerCase()) ||
+            this.fullPortolio[i].description.toLowerCase().includes(this.portfolioFilter[j].toLowerCase())
+          )
+        }
+        if (filter) {
+          this.items.push(this.fullPortolio[i])
+        }
+      }
+    },
+    removeItem (item) {
+      this.portfolioFilter.splice(this.portfolioFilter.indexOf(item), 1)
+      this.portfolioFilter = [...this.portfolioFilter]
+    }
+  },
+  created () {
+    this.items = this.fullPortolio
+  }
 }
 </script>
 
@@ -190,5 +242,15 @@ export default {
   font-weight: 650;
   font-family: 'Muli', Arial, Verdana, sans-serif;
   color: rgba(255, 255, 255, 1)
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: 10px;
+}
+.items-list-move {
+  transition: transform 1s;
 }
 </style>
