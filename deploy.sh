@@ -15,6 +15,6 @@ git init
 git add -A
 git commit -m "deploy $1" 
 
-git push -f git@github.com:preethamrn/preethamrn.github.io.git master
+git push -f https://github.com/preethamrn/preethamrn.github.io master
 
 cd -
