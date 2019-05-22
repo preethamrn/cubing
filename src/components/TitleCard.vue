@@ -42,7 +42,6 @@ export default {
   min-height: 100vh;
   width: 100vw;
 }
-
 .title-name {
   color: rgba(255, 255, 255, 1);
   margin-top: 15%;
@@ -58,14 +57,33 @@ export default {
   font-family: "Lucida Console", Monaco, monospace !important;
 }
 
+@media only screen and (max-width: 1080px) {
+  .title-name {
+    font-size: 2.8em;
+    margin-top: 0%;
+    width: 100%;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-family: "Monument", sans-serif !important;
+  }
+  .title-text {
+    color: rgba(255, 255, 255, 1);
+    text-align: left !important;
+    margin-left: 10%;
+    font-size: 2em;
+    padding-bottom: 15%;
+    font-family: "Lucida Console", Monaco, monospace !important;
+  }
+}
+
+.link {
+  text-decoration: underline;
+}
 .red-code {
   color: rgb(255, 70, 70);
 }
 .green-code {
-  color: rgb(64, 255, 64);
-}
-.link {
-  text-decoration: underline;
+  color: rgb(142, 255, 142);
 }
 .blue-code {
   color: rgb(94, 94, 255);

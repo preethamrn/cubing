@@ -30,6 +30,7 @@
         <v-flex md1 xs3><a href='https://www.linkedin.com/in/preethamrn' target='_blank'><v-icon :dark='top'>fab fa-linkedin</v-icon></a></v-flex>
         <v-flex md1 xs3><a href='https://www.instagram.com/preethamrn' target='_blank'><v-icon :dark='top'>fab fa-instagram</v-icon></a></v-flex>
         <v-flex md1 xs3><a href='https://www.youtube.com/channel/UC7tKYiFtH_6HCBD4hh7hTWw' target='_blank'><v-icon :dark='top'>fab fa-youtube</v-icon></a></v-flex>
+        <v-flex md1 xs3><a href='mailto:preetham.narayanareddy@gmail.com' target='_blank'><v-icon :dark='top'>fas fa-envelope</v-icon></a></v-flex>
       </v-layout>
     </v-toolbar>
 

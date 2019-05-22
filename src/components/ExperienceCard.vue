@@ -7,16 +7,17 @@
     <v-flex offset-md3 offset-xs1 md6 xs10>
       <v-timeline align-top dense>
         <div v-for='job in experiences' :key='job.timeRange'>
-          <v-timeline-item color="pink" small>
-            <v-layout pt-3>
-              <v-flex xs3>
+          <v-timeline-item class='pt-3' color="pink" small>
+            <div>
+              <div class='timeline-range'>
                 <strong>{{ job.timeRange }}</strong>
-              </v-flex>
-              <v-flex>
+                <div class='timeline-underline'></div>
+              </div>
+              <div class='timeline-description'>
                 <strong>{{ job.position }}</strong>
                 <div class="caption" v-html='job.description'></div>
-              </v-flex>
-            </v-layout>
+              </div>
+            </div>
           </v-timeline-item>
         </div>
       </v-timeline>
@@ -85,5 +86,22 @@ export default {
   background: rgba(255, 255, 255, 1);
   left: 17px;
   width: 4px;
+}
+
+.timeline-range {
+  width: 150px;
+  margin-right: 50px;
+  float: left;
+}
+.timeline-description {
+  float: left;
+  width: 66%;
+}
+.timeline-underline {
+  height: 3px;
+  width: 100px;
+  background-color: rgba(255, 255, 255, 0.87);
+  right: 5px;
+  margin-bottom: 16px;
 }
 </style>
