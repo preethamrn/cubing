@@ -192,9 +192,6 @@ export default {
     ]
   }),
   methods: {
-    shuffle () {
-      this.items = _.shuffle(this.items)
-    },
     filter () {
       this.items = []
       if (this.portfolioFilter.length === 0) {
