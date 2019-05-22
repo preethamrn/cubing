@@ -73,7 +73,7 @@ export default {
             link: 'http://www.preethamrn.com'
           },{
             type: 'github',
-            link: 'https://github.com/preethamrn/preethamrn.github.io'
+            link: 'https://github.com/preethamrn/preethamrn.com'
           }
         ],
         timeRange: 'May 2019',
