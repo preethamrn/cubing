@@ -45,7 +45,7 @@ export default {
 .title-name {
   color: rgba(255, 255, 255, 1);
   margin-top: 15%;
-  font-size: 7em;
+  font-size: 5vw;
   font-weight: 700;
   letter-spacing: 2px;
   font-family: "Monument", sans-serif !important;
