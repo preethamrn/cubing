@@ -6,7 +6,7 @@
         style='margin-top: 33%'
         color='grey lighten-4'
       >
-        <img src='../assets/profile-pic.jpg' alt='avatar'>
+        <img src='../../assets/profile-pic.jpg' alt='avatar'>
       </v-avatar>
     </v-flex>
     <v-flex md6 xs12 text-xs-center text-md-left>
@@ -35,7 +35,7 @@ export default {
 
 <style scoped>
 .layout.title-card {
-  background-image: url('../assets/intro-bg2.jpg');
+  background-image: url('../../assets/intro-bg2.jpg');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;

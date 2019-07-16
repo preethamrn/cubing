@@ -44,10 +44,10 @@
 </template>
 
 <script>
-  import TitleCard from '@/components/TitleCard'
-  import AboutMeCard from '@/components/AboutMeCard'
-  import ExperienceCard from '@/components/ExperienceCard'
-  import PortfolioCard from '@/components/PortfolioCard'
+  import TitleCard from '@/components/HomePage/TitleCard'
+  import AboutMeCard from '@/components/HomePage/AboutMeCard'
+  import ExperienceCard from '@/components/HomePage/ExperienceCard'
+  import PortfolioCard from '@/components/HomePage/PortfolioCard'
   export default {
     components: {
       TitleCard,

@@ -1,24 +1,8 @@
 <template>
-  <v-app>
-    <HomePage/>
-  </v-app>
+  <div id="app">
+    <router-view/>
+  </div>
 </template>
-
-<script>
-import HomePage from './components/HomePage'
-
-export default {
-  name: 'App',
-  components: {
-    HomePage
-  },
-  data () {
-    return {
-      //
-    }
-  }
-}
-</script>
 
 <style>
 @font-face {

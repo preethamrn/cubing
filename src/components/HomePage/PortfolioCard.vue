@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import PortfolioItem from '@/components/PortfolioItem'
+import PortfolioItem from '@/components/HomePage/PortfolioItem'
 export default {
   name: 'PortfolioCard',
   components: {
