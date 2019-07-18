@@ -1,14 +1,14 @@
 <template>
-  <div class="3bldtrainer">
-    <v-container style='padding-top: 20px'>
-      <h1 style='padding-bottom: 20px'>3BLD Trainer</h1>
+  <div class="bldtrainer3">
+    <v-container>
+      <h1 style='padding: 20px 0 20px 0'>3BLD Trainer</h1>
       <v-layout row>
-        <div ref='s1' class='sticker-box'></div>
-        <div ref='s2' class='sticker-box'></div>
+        <div :style='{display: testCorners ? "inline" : "none", background: s1bg}' class='sticker-box'></div>
+        <div :style='{display: testCorners ? "inline" : "none", background: s2bg}' class='sticker-box'></div>
       </v-layout>
       <v-layout row>
-        <div ref='s3' class='sticker-box'></div>
-        <input class='' placeholder="mobile users type here" />
+        <div :style='{display: testCorners ? "inline" : "none", background: s3bg}' class='sticker-box'></div>
+        <input class='' placeholder="click on mobile" />
       </v-layout>
     </v-container>
   </div>
@@ -27,13 +27,16 @@ export default {
       'D': 'yellow'
     },
     corners: ['UBL','URB','UFR','ULF','LUB','LFU','LDF','LBD','FUL','FRU','FDR','FLD','RUF','RBU','RDB','RFD','BUR','BLU','BDL','BRD','DFL','DRF','DBR','DLB'],
-    edges: ['UB','UR','UF','UL','LU','LF','LD','LB','FU','FR','FD','FL','RU','RB','RD','RF','BU','BL','BD','BR','DF','DR','DB','DL']
+    edges: ['UB','UR','UF','UL','LU','LF','LD','LB','FU','FR','FD','FL','RU','RB','RD','RF','BU','BL','BD','BR','DF','DR','DB','DL'],
+    testCorners: true,
+
+    s1bg: 'red',
+    s2bg: 'blue',
+    s3bg: 'white'
   }),
   methods: {
     next () {
-      console.log(this.$refs['s1'])
-      console.log(this.$refs['s2'])
-      console.log(this.$refs['s3'])
+
     }
   },
   mounted: function () {
@@ -48,5 +51,9 @@ export default {
   width: 100px !important;
   margin: 5px;
   background: red;
+}
+.bldtrainer3 {
+  background: #eeeeee;
+  height: 100vh;
 }
 </style>
