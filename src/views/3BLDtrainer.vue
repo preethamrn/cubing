@@ -1,10 +1,15 @@
 <template>
   <div class="3bldtrainer">
-    <h1>3BLD Trainer</h1>
-    <v-container>
-      <v-flex xs2 ref='s1'></v-flex>
-      <v-flex xs2 ref='s2'></v-flex>
-      <v-flex xs2 ref='s3'></v-flex>
+    <v-container style='padding-top: 20px'>
+      <h1 style='padding-bottom: 20px'>3BLD Trainer</h1>
+      <v-layout row>
+        <div ref='s1' class='sticker-box'></div>
+        <div ref='s2' class='sticker-box'></div>
+      </v-layout>
+      <v-layout row>
+        <div ref='s3' class='sticker-box'></div>
+        <input class='' placeholder="mobile users type here" />
+      </v-layout>
     </v-container>
   </div>
 </template>
@@ -38,5 +43,10 @@ export default {
 </script>
 
 <style scoped>
-
+.sticker-box {
+  height: 100px !important;
+  width: 100px !important;
+  margin: 5px;
+  background: red;
+}
 </style>
