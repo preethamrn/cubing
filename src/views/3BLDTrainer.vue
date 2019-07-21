@@ -9,7 +9,7 @@
       </v-layout>
       <v-layout row>
         <div :style='{display: testCorners ? "inline" : "none", background: stickerBG[2]}' class='sticker-box'></div>
-        <input class='mobile-input' placeholder="click me" />
+        <input class='mobile-input' ref='mobile-input' placeholder="click me" @input='mobileInputUpdate'/>
       </v-layout>
       <v-layout v-if='correctAnswer !== ""' column>
         <div v-if='correctAnswer === selectedAnswer'><h1 style='color: green'>Correct!</h1></div>
@@ -128,6 +128,10 @@ export default {
       this.debouncer = true
       this.checkKey(event.key)
       setTimeout(this.next, 1000)
+    },
+    mobileInputUpdate (event) {
+      this.$refs['mobile-input'].value = ''
+      this.eventHandler({type: 'keydown', key: event.data})
     },
 
     formatTime (time) {
