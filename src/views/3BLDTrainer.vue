@@ -102,19 +102,21 @@ export default {
   methods: {
     next () {
       this.debouncer = false
-      this.realTimeStart = window.performance.now()
-
-      if (this.testCorners) {
-        let keys = Object.keys(this.corners)
-        this.selection = keys[Math.floor(Math.random() * keys.length)]
-      } else {
-        let keys = Object.keys(this.edges)
+      
+      let keys = Object.keys(this.testCorners ? this.corners : this.edges)
+      
+      // don't allow same selection twice in a row because this looks like UI is lagging
+      let oldSelection = this.selection
+      while (oldSelection === this.selection) { 
         this.selection = keys[Math.floor(Math.random() * keys.length)]
       }
+
+      // convert selection into configured sticker colors
       for (let i=0; i<this.selection.length; i++) {
         this.stickerBG[i] = this.colors[this.selection[i]]
       }
       this.$forceUpdate()
+      this.realTimeStart = window.performance.now()
     },
     checkKey (key) {
       this.correctAnswer = (this.testCorners ? this.corners : this.edges)[this.selection].toUpperCase()
