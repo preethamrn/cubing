@@ -6,7 +6,7 @@
 
 <style>
 @font-face {
-  font-family: "Monument";
+  font-family: "Monument", Arial;
   src: url("./assets/MonumentExtended-Regular.otf");
 }
 html {
