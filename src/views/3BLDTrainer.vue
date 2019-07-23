@@ -2,7 +2,7 @@
   <div class="bldtrainer3">
     <v-container>
       <h1 style='padding: 20px 0 20px 0'>3BLD Trainer</h1>
-      <v-switch v-model='testCorners' label='Train Corners' color='success' @change='next'></v-switch>
+      <v-switch v-model='testCorners' :label='testCorners ? "Corners" : "Edges"' color='success' @change='next'></v-switch>
       <v-layout row wrap>
         <v-flex xs12 md5>
           <v-layout row>
