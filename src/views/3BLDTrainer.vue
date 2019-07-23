@@ -210,7 +210,10 @@ export default {
     timeTaken () {
       this.times.unshift({
         time: this.timeTaken,
-        correct: this.correctAnswer === this.selectedAnswer
+        correct: this.correctAnswer === this.selectedAnswer,
+        selection: this.selection,
+        selectedAnswer: this.selectedAnswer,
+        correctAnswer: this.correctAnswer,
       })
       localStorage.setItem('3BLD-trainer-times', JSON.stringify(this.times))
     }
@@ -233,7 +236,8 @@ export default {
 }
 .bldtrainer3 {
   background: #eeeeee;
-  height: 100vh;
+  height: 100%;
+  min-height: 100vh;
 }
 
 .correct-answer {
