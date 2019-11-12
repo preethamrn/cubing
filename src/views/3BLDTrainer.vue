@@ -1,39 +1,39 @@
 <template>
   <div class="bldtrainer3">
     <v-container>
-      <v-bottom-sheet v-model='dialog'>
+      <v-bottom-sheet v-model='dialog' scrollable>
         <template v-slot:activator>
           <v-layout row style='padding: 20px 0 20px 0'>
             <v-flex xs5><h1>3BLD Trainer</h1></v-flex>
-            <v-flex xs7><v-btn color='blue' dark>Settings</v-btn></v-flex>
+            <v-flex xs7><v-btn color='blue' style='font-weight: bold !important; font-family: "Lucida Console", Monaco, monospace !important;' dark>Settings</v-btn></v-flex>
           </v-layout>
         </template>
-        <v-container style='background: white'>
+        <v-container class='bottomsheet'>
           <h1>Settings</h1>
-          <v-layout row style='padding: 10px 0 10px 0'>
-            <v-flex>
+          <v-layout row wrap style='padding: 10px 0 10px 0'>
+            <v-flex xs3>
               <h2>Memo Type</h2>
-              <v-radio-group v-model='radioGroup' @change='next'>
+              <v-radio-group v-model='radioGroup' @change='next' style='font-family: "Lucida Console", Monaco, monospace !important;'>
                 <v-radio label='Corners' :value='1' />
                 <v-radio label='Edges' :value='2' />
               </v-radio-group>
             </v-flex>
-            <v-flex>
+            <v-flex xs3>
               <h2>Corners Letter Scheme</h2>
               <div v-for='corner in Object.keys(corners)' :key='corner'>
-                {{corner}}: <input v-model='corners[corner]' :prefix='corner + ":"' style='border-style: groove'/>
+                <span class='option'>{{corner}}: </span><input v-model='corners[corner]' :prefix='corner + ":"' style='border-style: groove; width: 30px;'/>
               </div>
             </v-flex>
-            <v-flex>
+            <v-flex xs3>
               <h2>Edges Letter Scheme</h2>
               <div v-for='edge in Object.keys(edges)' :key='edge'>
-                {{edge}}: <input v-model='edges[edge]' :prefix='edge + ":"' style='border-style: groove'/>
+                <span class='option'>{{edge}}: </span><input v-model='edges[edge]' :prefix='edge + ":"' style='border-style: groove; width: 30px;'/>
               </div>
             </v-flex>
-            <v-flex>
+            <v-flex xs3>
               <h2>Color Scheme</h2>
               <div v-for='color in Object.keys(colors)' :key='color'>
-                {{color}}: <input v-model='colors[color]' :prefix='color + ":"' style='border-style: groove'/>
+                <span class='option'>{{color}}: </span><input v-model='colors[color]' :prefix='color + ":"' style='border-style: groove; width: 60px;'/>
               </div>
             </v-flex>
           </v-layout>
@@ -125,35 +125,35 @@ export default {
     },
     edges: {
       'UB': 'A',
-      'UR': 'B', 
-      'UF': 'C', 
-      'UL': 'D', 
-      'LU': 'E', 
-      'LF': 'F', 
-      'LD': 'G', 
-      'LB': 'H', 
-      'FU': 'I', 
-      'FR': 'J', 
-      'FD': 'K', 
-      'FL': 'L', 
-      'RU': 'M', 
-      'RB': 'N', 
-      'RD': 'O', 
-      'RF': 'P', 
-      'BU': 'Q', 
-      'BL': 'R', 
-      'BD': 'S', 
-      'BR': 'T', 
-      'DF': 'U', 
-      'DR': 'V', 
-      'DB': 'W', 
+      'UR': 'B',
+      'UF': 'C',
+      'UL': 'D',
+      'LU': 'E',
+      'LF': 'F',
+      'LD': 'G',
+      'LB': 'H',
+      'FU': 'I',
+      'FR': 'J',
+      'FD': 'K',
+      'FL': 'L',
+      'RU': 'M',
+      'RB': 'N',
+      'RD': 'O',
+      'RF': 'P',
+      'BU': 'Q',
+      'BL': 'R',
+      'BD': 'S',
+      'BR': 'T',
+      'DF': 'U',
+      'DR': 'V',
+      'DB': 'W',
       'DL': 'X'
     },
     radioGroup: 1,
 
     selection: '',
     stickerBG: ['red', 'blue', 'white'],
-    
+
     correctAnswer: '',
     selectedAnswer: '',
     realTimeStart: 0,
@@ -168,12 +168,12 @@ export default {
   methods: {
     next () {
       this.debouncer = false
-      
+
       let keys = Object.keys(this.testCorners ? this.corners : this.edges)
-      
+
       // don't allow same selection twice in a row because this looks like UI is lagging
       let oldSelection = this.selection
-      while (oldSelection === this.selection) { 
+      while (oldSelection === this.selection) {
         this.selection = keys[Math.floor(Math.random() * keys.length)]
       }
 
@@ -286,6 +286,20 @@ export default {
 </script>
 
 <style scoped>
+h1,h2,h3 {
+  font-family: 'Monument', Verdana, sans-serif !important;
+}
+
+span.option {
+  font-family: "Lucida Console", Monaco, monospace !important;
+}
+
+.bottomsheet {
+  background: white;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
 .sticker-box {
   height: 100px !important;
   width: 100px !important;
