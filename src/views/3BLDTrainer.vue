@@ -1,8 +1,45 @@
 <template>
   <div class="bldtrainer3">
     <v-container>
-      <h1 style='padding: 20px 0 20px 0'>3BLD Trainer</h1>
-      <v-switch v-model='testCorners' :label='testCorners ? "Corners" : "Edges"' color='success' @change='next'></v-switch>
+      <v-bottom-sheet v-model='dialog'>
+        <template v-slot:activator>
+          <v-layout row style='padding: 20px 0 20px 0'>
+            <v-flex xs5><h1>3BLD Trainer</h1></v-flex>
+            <v-flex xs7><v-btn color='blue' dark>Settings</v-btn></v-flex>
+          </v-layout>
+        </template>
+        <v-container style='background: white'>
+          <h1>Settings</h1>
+          <v-layout row style='padding: 10px 0 10px 0'>
+            <v-flex>
+              <h2>Memo Type</h2>
+              <v-radio-group v-model='radioGroup' @change='next'>
+                <v-radio label='Corners' :value='1' />
+                <v-radio label='Edges' :value='2' />
+              </v-radio-group>
+            </v-flex>
+            <v-flex>
+              <h2>Corners Letter Scheme</h2>
+              <div v-for='corner in Object.keys(corners)' :key='corner'>
+                {{corner}}: <input v-model='corners[corner]' :prefix='corner + ":"' style='border-style: groove'/>
+              </div>
+            </v-flex>
+            <v-flex>
+              <h2>Edges Letter Scheme</h2>
+              <div v-for='edge in Object.keys(edges)' :key='edge'>
+                {{edge}}: <input v-model='edges[edge]' :prefix='edge + ":"' style='border-style: groove'/>
+              </div>
+            </v-flex>
+            <v-flex>
+              <h2>Color Scheme</h2>
+              <div v-for='color in Object.keys(colors)' :key='color'>
+                {{color}}: <input v-model='colors[color]' :prefix='color + ":"' style='border-style: groove'/>
+              </div>
+            </v-flex>
+          </v-layout>
+          <v-btn color='blue' dark @click='saveSettings'>Save Settings</v-btn>
+        </v-container>
+      </v-bottom-sheet>
       <v-layout row wrap>
         <v-flex xs12 md5>
           <v-layout row>
@@ -112,11 +149,11 @@ export default {
       'DB': 'W', 
       'DL': 'X'
     },
-    testCorners: true,
+    radioGroup: 1,
 
     selection: '',
     stickerBG: ['red', 'blue', 'white'],
-
+    
     correctAnswer: '',
     selectedAnswer: '',
     realTimeStart: 0,
@@ -124,6 +161,9 @@ export default {
     times: [],
 
     debouncer: false, // prevent multiple keypressed or keypressed during interval from checking
+
+    // styling
+    dialog: false,
   }),
   methods: {
     next () {
@@ -152,7 +192,7 @@ export default {
     },
 
     eventHandler (event) {
-      if (this.debouncer || event.type !== 'keydown' || event.key.length > 1) return
+      if (this.debouncer || this.dialog || event.type !== 'keydown' || event.key.length > 1) return
       this.debouncer = true
       this.checkKey(event.key)
       setTimeout(this.next, 1000)
@@ -196,12 +236,28 @@ export default {
       }, 0);
       var avg = sum / data.length;
       return avg;
+    },
+    saveSettings() {
+      localStorage.setItem('3BLD-trainer-settings', JSON.stringify({
+        colors: this.colors,
+        corners: this.corners,
+        edges: this.edges,
+        testing: this.radioGroup,
+      }))
+      this.dialog = false
     }
   },
   mounted: function () {
     let times = JSON.parse(localStorage.getItem('3BLD-trainer-times'))
     if (times) {
       this.times = times
+    }
+    let settings = JSON.parse(localStorage.getItem('3BLD-trainer-settings'))
+    if (settings) {
+      this.colors = settings.colors
+      this.corners = settings.corners
+      this.edges = settings.edges
+      this.radioGroup = settings.testing
     }
     this.next()
     document.addEventListener('keydown', this.eventHandler)
@@ -221,6 +277,9 @@ export default {
   computed: {
     correctTimes () {
       return this.times.filter(time => time.correct).map(time => time.time)
+    },
+    testCorners () {
+      return this.radioGroup === 1
     }
   }
 }
