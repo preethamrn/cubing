@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/HomePage.vue'
+const TBLDTrainer = () => import( './views/3BLDTrainer.vue')
+const Median = () => import( './views/Median.vue')
 
 Vue.use(Router)
 
@@ -15,18 +17,12 @@ export default new Router({
     {
       path: '/3bldtrainer',
       name: '3BLD Trainer',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "3bldtrainer" */ './views/3BLDTrainer.vue')
+      component: TBLDTrainer,
     },
     {
       path: '/median',
       name: 'Median',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "3bldtrainer" */ './views/Median.vue')
+      component: Median,
     },
   ]
 })
