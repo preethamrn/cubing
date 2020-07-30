@@ -75,7 +75,7 @@
   }
 </script>
 
-<style>
+<style scoped>
 .v-toolbar {
   position: fixed;
   top: 0;
