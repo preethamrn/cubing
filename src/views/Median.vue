@@ -19,6 +19,7 @@
           {text: 'Name', value: 'name'},
           {text: 'Median', value: 'value'},
         ]"
+        :pagination.sync='pagination'
         :items='tableItems'
         :search='search'
         hide-actions
@@ -26,7 +27,7 @@
         <template v-slot:items="props">
           <td>{{ props.item.num }}</td>
           <td class="text-xs-left">{{ props.item.name }}</td>
-          <td class="text-xs-left">{{ props.item.value }}</td>
+          <td class="text-xs-left">{{ props.item.value.toFixed(2) }}</td>
         </template>
       </v-data-table>
     </v-card>
@@ -41,6 +42,11 @@ export default {
       solveCount: 25,
       results: {},
       search: '',
+      pagination: {
+          descending: true,
+          sortBy: 'num',
+          rowsPerPage: -1,
+        },
     }
   },
   methods: {
@@ -83,10 +89,13 @@ export default {
             if (!(v[0] instanceof Array)) throw {name: 'FormatError', message: `no sub-Array (${v[0]} ${i} ${key})`}
 
             if (v[0][0] === -1) return Infinity // DNF
-            return v[0][1] + v[0][0] // time + penalties
+            return Math.floor((v[0][1] + v[0][0])/10) // time + penalties
           })
           value.sort((a,b) => a - b)
-          this.$set(this.results, sessionName, value[Math.floor(Math.min(this.solveCount, value.length)/2)])
+          this.$set(this.results, matches[1], {
+            name: sessionName,
+            median: value[Math.floor(Math.min(this.solveCount, value.length)/2)],
+          })
         })
       } catch (e) {
         // eslint-disable-next-line
@@ -98,7 +107,7 @@ export default {
   },
   computed: {
     tableItems () {
-      return Object.entries(this.results).map(([key, value], i) => ({num: i+1, name: key, value: value/1000}))
+      return Object.entries(this.results).map(([key, value]) => ({num: key, name: value.name, value: value.median/100}))
     }
   }
 }
