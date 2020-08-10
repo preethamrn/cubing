@@ -7,7 +7,7 @@ const Valorant = () => import( './views/Valorant.vue')
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   routes: [
     {
@@ -19,16 +19,26 @@ export default new Router({
       path: '/3bldtrainer',
       name: '3BLD Trainer',
       component: TBLDTrainer,
+      meta: {title: '3BLD Trainer'},
     },
     {
       path: '/median',
       name: 'Median',
       component: Median,
+      meta: {title: 'MonkeyLeague Median'},
     },
     {
       path: '/valorant',
       name: 'Valorant',
       component: Valorant,
+      meta: {title: 'Valorant Player History'},
     },
   ]
 })
+
+router.beforeEach((to, from, next) => {
+  document.title = to.meta.title || 'preethamrn'
+  next()
+})
+
+export default router

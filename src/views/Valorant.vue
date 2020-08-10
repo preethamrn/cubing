@@ -4,12 +4,12 @@
       <d3-network :net-nodes='nodes' :net-links='links' :options='options' @node-click='highlightNode' />
     </div>
     <v-card class='info-box'>
-      <v-card-title><h1>Valorant Player History</h1></v-card-title>
+      <v-card-title><img src='valorant.png' style='padding-right: 10px;' /><h1>Valorant Player History</h1></v-card-title>
       <v-autocomplete
           v-model='search'
           :items='searchItems'
           label='Player Name'
-          style='margin: 20px 10px 0 10px'
+          style='margin: 0px 10px 0 10px'
         >
       </v-autocomplete>
       <v-card-text>
@@ -22,21 +22,21 @@
         </ul>
       </v-card-text>
     </v-card>
-    <v-card class='player-history'>
-      <v-card-title v-if='selected >= 0'><h1>{{nodes[selected].name}}</h1><a :href='`https://liquipedia.net/valorant/${nodes[selected].name}`' target='_blank' style='right: 20px; position: absolute;'><img src='liquipedia.png' height='60px' /></a></v-card-title>
+    <v-card :class="{'player-history': true, 'no-selection': selected < 0}">
+      <v-card-title v-if='search'><h1>{{search}}</h1><a :href='`https://liquipedia.net/valorant/${search}`' target='_blank' style='right: 20px; position: absolute;'><img src='liquipedia.png' height='60px' /></a></v-card-title>
       <v-card-title v-else><h1>No player selected</h1></v-card-title>
       <v-card-text v-if='selected >= 0'>
         <h3>Transfers</h3>
         <ul>
-          <li v-for='(transfer, index) in playerInfo[nodes[selected].name].transfers' :key='`transfer${index}`'>{{transfer.date}}: From <a v-if='transfer.old != "None"' :href='`https://liquipedia.net/valorant/${transfer.old}`' target='_blank'>{{transfer.old}}</a><span v-else>{{transfer.old}}</span> to <a v-if='transfer.new != "None"' :href='`https://liquipedia.net/valorant/${transfer.new}`' target='_blank'>{{transfer.new}}</a><span v-else>{{transfer.new}}</span></li>
+          <li v-for='(transfer, index) in playerInfo[search].transfers' :key='`transfer${index}`'>{{transfer.date}}: From <a v-if='transfer.old != "None"' :href='`https://liquipedia.net/valorant/${transfer.old}`' target='_blank'>{{transfer.old}}</a><span v-else>{{transfer.old}}</span> to <a v-if='transfer.new != "None"' :href='`https://liquipedia.net/valorant/${transfer.new}`' target='_blank'>{{transfer.new}}</a><span v-else>{{transfer.new}}</span></li>
         </ul>
         <h3>Current Team</h3>
-        <div v-if='playerInfo[nodes[selected].name].current === "None"'>No current team</div>
+        <div v-if='playerInfo[search].current === "None"'>No current team</div>
         <ul v-else>
-          <li v-for='(teammate, index) in transferTeams[playerInfo[nodes[selected].name].current]' :key='`team${index}`' @click='search=teammate'><a>{{teammate}}</a></li>
+          <li v-for='(teammate, index) in transferTeams[playerInfo[search].current]' :key='`team${index}`' @click='search=teammate'><a>{{teammate}}</a></li>
         </ul>
         <h3>All teammates</h3>
-        <span v-for='(teammate, index) in playerInfo[nodes[selected].name].teammates' :key='`oldteam${index}`' @click='search=teammate'><a>{{teammate}}</a> &nbsp;</span>
+        <span v-for='(teammate, index) in playerInfo[search].teammates' :key='`oldteam${index}`' @click='search=teammate'><a>{{teammate}}</a> &nbsp;</span>
       </v-card-text>
     </v-card>
   </div>
@@ -100,9 +100,16 @@ export default {
           'translate(' + translateX + 'px, ' + translateY + 'px)' + 'scale(' + scale + ')'
     },
     highlightNode(event, node) {
+      this.search = this.nodes[node.index].name
       if (this.selected !== -1) this.nodes[this.selected]._cssClass = ''
+      this.nodes[node.index]._cssClass = 'selection'
+      
       this.selected = node.index
-      this.nodes[this.selected]._cssClass = 'selection'
+      // Use this timeout so that the player info card will animate when a new player is selected.
+      // this.selected = -1
+      // setTimeout(() => {
+      //   this.selected = node.index
+      // }, 250)
     },
   },
   watch: {
@@ -114,6 +121,13 @@ export default {
         }
       }
     }
+  },
+  created () {
+    var link = document.querySelector("link[rel*='icon']") || document.createElement('link')
+    link.type = 'image/x-icon'
+    link.rel = 'shortcut icon'
+    link.href = 'valorant.png'
+    document.getElementsByTagName('head')[0].appendChild(link)
   },
   mounted () {
     this.nodes = Object.keys(transfersGraph).map(v => ({id: v, name: v}))
@@ -173,5 +187,8 @@ body{
   max-height: 60vh;
   height: 500px;
   overflow: auto;
+}
+.no-selection {
+  height: 100px !important;
 }
 </style>
