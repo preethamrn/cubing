@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "core-js": "^2.6.5",
+    "interactjs": "^1.9.20",
     "vue": "^2.6.10",
+    "vue-d3-network": "^0.1.28",
     "vue-router": "^3.0.3",
     "vuetify": "^1.5.5"
   },
