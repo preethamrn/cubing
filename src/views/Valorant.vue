@@ -1,6 +1,6 @@
 <template>
   <div class='valorant'>
-    <div id='interact-bracket'>
+    <div id='interact-bracket' style='touch-action: none'>
       <d3-network :net-nodes='nodes' :net-links='links' :options='options' @node-click='highlightNode' />
     </div>
     <v-card class='info-box'>
@@ -14,27 +14,29 @@
       </v-autocomplete>
       <v-card-text>
         <ul>
-          <li>Drag around the graph to see all the players.</li>
-          <li>Search for a specific player above to see who they are connected to.</li>
-          <li>Click on players to see more information about them.</li>
+          <li><b>Drag</b> around the graph to see all the players.</li>
+          <li><b>Search</b> for a specific player above to see who they are connected to.</li>
+          <li>Click on a player circle to see more information about them.</li>
+          <li>Click on the <b>Liquipedia logo</b> to go to the player page.</li>
           <li>Follow me on <a href='https://www.twitch.tv/preethamrn' target='_blank'>Twitch (<b>preethamrn</b>)</a> for more Valorant and programming content.</li>
         </ul>
       </v-card-text>
     </v-card>
     <v-card class='player-history'>
-      <v-card-title><h1>{{selected >= 0 ? nodes[selected].name : 'No player selected'}}</h1></v-card-title>
+      <v-card-title v-if='selected >= 0'><h1>{{nodes[selected].name}}</h1><a :href='`https://liquipedia.net/valorant/${nodes[selected].name}`' target='_blank' style='right: 20px; position: absolute;'><img src='liquipedia.png' height='60px' /></a></v-card-title>
+      <v-card-title v-else><h1>No player selected</h1></v-card-title>
       <v-card-text v-if='selected >= 0'>
         <h3>Transfers</h3>
         <ul>
-          <li v-for='(transfer, index) in playerInfo[nodes[selected].name].transfers' :key='`transfer${index}`'>{{transfer.date}}: From {{transfer.old}} to {{transfer.new}}</li>
+          <li v-for='(transfer, index) in playerInfo[nodes[selected].name].transfers' :key='`transfer${index}`'>{{transfer.date}}: From <a v-if='transfer.old != "None"' :href='`https://liquipedia.net/valorant/${transfer.old}`' target='_blank'>{{transfer.old}}</a><span v-else>{{transfer.old}}</span> to <a v-if='transfer.new != "None"' :href='`https://liquipedia.net/valorant/${transfer.new}`' target='_blank'>{{transfer.new}}</a><span v-else>{{transfer.new}}</span></li>
         </ul>
         <h3>Current Team</h3>
         <div v-if='playerInfo[nodes[selected].name].current === "None"'>No current team</div>
         <ul v-else>
-          <li v-for='(teammate, index) in transferTeams[playerInfo[nodes[selected].name].current]' :key='`team${index}`'>{{teammate}}</li>
+          <li v-for='(teammate, index) in transferTeams[playerInfo[nodes[selected].name].current]' :key='`team${index}`' @click='search=teammate'><a>{{teammate}}</a></li>
         </ul>
         <h3>All teammates</h3>
-        <span v-for='(teammate, index) in playerInfo[nodes[selected].name].teammates' :key='`oldteam${index}`'>{{teammate}} &nbsp;</span>
+        <span v-for='(teammate, index) in playerInfo[nodes[selected].name].teammates' :key='`oldteam${index}`' @click='search=teammate'><a>{{teammate}}</a> &nbsp;</span>
       </v-card-text>
     </v-card>
   </div>
@@ -58,7 +60,7 @@ export default {
       links: [],
       options: {
         force: 500,
-        size: {w: 4000, h: 3000},
+        size: {w: 3000, h: 2500},
         nodeSize: 20,
         nodeLabels: true,
         canvas: false,
