@@ -1,6 +1,6 @@
 <template>
   <div class='valorant'>
-    <div id='interact-bracket' style='touch-action: none'>
+    <div id='interact-bracket' ref='interactBracket' style='touch-action: none'>
       <d3-network :net-nodes='nodes' :net-links='links' :options='options' @node-click='highlightNode' />
     </div>
     <v-card class='info-box'>
@@ -20,6 +20,7 @@
           <li>Click on the <b>Liquipedia logo</b> to go to the player page.</li>
           <li>Follow me on <a href='https://www.twitch.tv/preethamrn' target='_blank'>Twitch (<b>preethamrn</b>)</a> for more Valorant and programming content.</li>
         </ul>
+        Last Updated: 2020-08-09
       </v-card-text>
     </v-card>
     <v-card :class="{'player-history': true, 'no-selection': selected < 0}">
@@ -105,6 +106,9 @@ export default {
       this.nodes[node.index]._cssClass = 'selection'
       
       this.selected = node.index
+      this.$set(this.currentTransform, 'translateX', window.screen.width * 0.6 - node.x)
+      this.$set(this.currentTransform, 'translateY', window.screen.height * 0.35 - node.y)
+      this.applyCurrentTransform(this.$refs.interactBracket)
       // Use this timeout so that the player info card will animate when a new player is selected.
       // this.selected = -1
       // setTimeout(() => {
@@ -116,7 +120,7 @@ export default {
     search () {
       for (let i in this.nodes) {
         if (this.nodes[i].id === this.search) {
-          this.highlightNode({}, {index: i})
+          this.highlightNode({}, this.nodes[i])
           break
         }
       }
