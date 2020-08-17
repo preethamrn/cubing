@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/HomePage.vue'
-const TBLDTrainer = () => import( './views/3BLDTrainer.vue')
-const Median = () => import( './views/Median.vue')
-const Valorant = () => import( './views/Valorant.vue')
+import Home from '../views/HomePage.vue'
+const TBLDTrainer = () => import( '../views/3BLDTrainer.vue')
+const Median = () => import( '../views/Median.vue')
+const Valorant = () => import( '../views/Valorant.vue')
 
 Vue.use(Router)
 

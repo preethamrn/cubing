@@ -19,15 +19,17 @@
           {text: 'Name', value: 'name'},
           {text: 'Median', value: 'value'},
         ]"
-        :pagination.sync='pagination'
+        :options='options'
         :items='tableItems'
         :search='search'
-        hide-actions
+        hide-default-footer
       >
-        <template v-slot:items="props">
-          <td>{{ props.item.num }}</td>
-          <td class="text-xs-left">{{ props.item.name }}</td>
-          <td class="text-xs-left">{{ props.item.value.toFixed(2) }}</td>
+        <template v-slot:item="props">
+          <tr>
+            <td>{{ props.item.num }}</td>
+            <td class="text-xs-left">{{ props.item.name }}</td>
+            <td class="text-xs-left">{{ props.item.value.toFixed(2) }}</td>
+          </tr>
         </template>
       </v-data-table>
     </v-card>
@@ -42,10 +44,10 @@ export default {
       solveCount: 25,
       results: {},
       search: '',
-      pagination: {
+      options: {
           descending: true,
           sortBy: 'num',
-          rowsPerPage: -1,
+          itemsPerPage: -1,
         },
     }
   },

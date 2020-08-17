@@ -4,12 +4,11 @@
   </v-app>
 </template>
 
-<style>
-@font-face {
-  font-family: "Monument", Arial;
+<style lang="scss">
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
   src: url("./assets/MonumentExtended-Regular.otf");
-}
-html {
-  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 </style>

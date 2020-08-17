@@ -14,9 +14,9 @@
       >
         <template slot='selection' slot-scope='data'>
           <v-chip
-            :selected='data.selected'
+            :input-value='data.selected'
             close
-            @input='removeItem(data.item)'
+            @click:close='removeItem(data.item)'
           >
             <strong>{{ data.item }}</strong>&nbsp;
           </v-chip>

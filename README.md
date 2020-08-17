@@ -1,4 +1,4 @@
-# preethamrn.github.io
+# preethamrn.com
 
 ## Project setup
 ```

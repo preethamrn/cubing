@@ -2,10 +2,10 @@
   <div class="bldtrainer3">
     <v-container>
       <v-bottom-sheet v-model='dialog' scrollable>
-        <template v-slot:activator>
+        <template v-slot:activator='{on}'>
           <v-layout row style='padding: 20px 0 20px 0'>
             <v-flex xs5><h1>3BLD Trainer</h1></v-flex>
-            <v-flex xs7><v-btn color='blue' style='font-weight: bold !important; font-family: "Lucida Console", Monaco, monospace !important;' dark>Settings</v-btn></v-flex>
+            <v-flex xs7><v-btn color='blue' style='font-weight: bold !important; font-family: "Lucida Console", Monaco, monospace !important;' dark v-on='on'>Settings</v-btn></v-flex>
           </v-layout>
         </template>
         <v-container class='bottomsheet'>
@@ -63,8 +63,8 @@
         </v-flex>
         <v-flex xs12 md7>
           <v-layout row :class="{'mt-5': $vuetify.breakpoint.smAndDown, 'ma-0': $vuetify.breakpoint.mdAndUp}">
-            <v-data-table hide-actions :headers='[{text: "#", sortable: false}, {text: "Time", sortable: false}, {text: "Delete?", sortable: false}]' :items='times' class='elevation-1'>
-              <template v-slot:items='props'>
+            <v-data-table :items-per-page='30' :headers='[{text: "#", sortable: false}, {text: "Time", sortable: false}, {text: "Delete?", sortable: false}]'  :items='times' class='elevation-1'>
+              <template v-slot:item='props'>
                 <tr :key='props.index' :class="{'correct-answer': props.item.correct, 'incorrect-answer': !props.item.correct}">
                   <td>{{ times.length - props.index }}</td>
                   <td class='text-xs-right'>{{ formatTime(props.item.time) }}</td>

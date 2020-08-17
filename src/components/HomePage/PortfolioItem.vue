@@ -18,9 +18,9 @@
       <v-card-actions>
         <div v-for='link in links' :key='link.link'>
           <a :href='link.link' target='_blank'>
-            <v-btn v-if="link.type === 'link'" flat color='purple'><v-icon>fas fa-link</v-icon></v-btn>
-            <v-btn v-if="link.type === 'github'" flat color='purple'><v-icon>fab fa-github</v-icon></v-btn>
-            <v-btn v-if="link.type === 'gitlab'" flat color='purple'><v-icon>fab fa-gitlab</v-icon></v-btn>
+            <v-btn v-if="link.type === 'link'" text color='purple'><v-icon>fas fa-link</v-icon></v-btn>
+            <v-btn v-if="link.type === 'github'" text color='purple'><v-icon>fab fa-github</v-icon></v-btn>
+            <v-btn v-if="link.type === 'gitlab'" text color='purple'><v-icon>fab fa-gitlab</v-icon></v-btn>
           </a>
         </div>
         <v-spacer></v-spacer>
