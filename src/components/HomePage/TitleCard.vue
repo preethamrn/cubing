@@ -9,7 +9,7 @@
         <img src='../../assets/profile-pic.jpg' alt='avatar'>
       </v-avatar>
     </v-flex>
-    <v-flex md6 xs12 text-xs-center text-md-left>
+    <v-flex class='title-all' md7 xs12 text-xs-center text-md-left>
       <div class='title-name'>
         Preetham Narayanareddy
       </div>
@@ -42,18 +42,21 @@ export default {
   min-height: 100vh;
   width: 100vw;
 }
-.title-name {
+.title-all {
+  background-color: rgba(0, 0, 0, 0.5);
   color: rgba(255, 255, 255, 1);
-  margin-top: 15%;
+  margin-top: 8%;
+  margin-bottom: 8%;
+  padding-left: 1%;
+}
+.title-name {
   font-size: 5vw;
   font-weight: 700;
   letter-spacing: 2px;
   font-family: "Monument", sans-serif !important;
 }
 .title-text {
-  color: rgba(255, 255, 255, 1);
   font-size: 3em;
-  padding-bottom: 15%;
   font-family: "Lucida Console", Monaco, monospace !important;
 }
 
@@ -86,6 +89,6 @@ export default {
   color: rgb(142, 255, 142);
 }
 .blue-code {
-  color: rgb(94, 94, 255);
+  color: rgb(255, 217, 0);
 }
 </style>
