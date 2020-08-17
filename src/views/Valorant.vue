@@ -195,4 +195,8 @@ body{
 .no-selection {
   height: 100px !important;
 }
+
+.v-card__text {
+  color: black !important;
+}
 </style>

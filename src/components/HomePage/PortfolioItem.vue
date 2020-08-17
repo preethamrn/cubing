@@ -71,6 +71,7 @@ export default {
 .v-card__text {
   font-weight: 600;
   font-size: 0.75em;
+  color: black !important;
 }
 .v-card.v-sheet {
   margin-bottom: 40px;
