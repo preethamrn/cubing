@@ -4,6 +4,7 @@ import Home from '../views/HomePage.vue'
 const TBLDTrainer = () => import( '../views/3BLDTrainer.vue')
 const Median = () => import( '../views/Median.vue')
 const Valorant = () => import( '../views/Valorant.vue')
+const StanzSheet = () => import( '../views/StanzSheet.vue')
 
 Vue.use(Router)
 
@@ -32,6 +33,12 @@ const router = new Router({
       name: 'Valorant',
       component: Valorant,
       meta: {title: 'Valorant Player History'},
+    },
+    {
+      path: '/stanzsheet',
+      name: "StanzSheet",
+      component: StanzSheet,
+      meta: {title: "Stanz's Spreadsheet"},
     },
   ]
 })

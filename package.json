@@ -13,7 +13,7 @@
     "vue": "^2.6.11",
     "vue-d3-network": "^0.1.28",
     "vue-router": "^3.2.0",
-    "vuetify": "^2.2.11"
+    "vuetify": "^2.3.8"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.5.0",
