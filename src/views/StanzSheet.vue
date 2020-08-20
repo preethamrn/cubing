@@ -8,23 +8,26 @@
 
     <v-tabs-items v-model='tab'>
       <v-tab-item :key='0'><player-select v-model='teamSelection' /></v-tab-item>
-      <v-tab-item :key='1'>Match Data Placeholder</v-tab-item>
+      <v-tab-item :key='1'><match-data :teamSelection='teamSelection' /></v-tab-item>
     </v-tabs-items>
   </div>
 </template>
 
 <script>
 import PlayerSelect from '@/components/StanzSheet/PlayerSelect'
+import MatchData from '@/components/StanzSheet/MatchData'
 
 export default {
   name: 'stanz-sheet',
   components: {
     PlayerSelect,
+    MatchData,
   },
   data () {
     return {
-      tab: 0,
-      teamSelection: {},
+      tab: 1,
+      //teamSelection: {},
+      teamSelection: {"map":"Split","teams":[{"team":"asdf","players":[{"name":"df","agent":"Reyna"},{"name":"2","agent":"Killjoy"},{"name":"3","agent":"Phoenix"},{"name":"5","agent":"Raze"},{"name":"6","agent":"Breach"}]},{"team":"fsd","players":[{"name":"q","agent":"Breach"},{"name":"w","agent":"Brimstone"},{"name":"e","agent":"Cypher"},{"name":"r","agent":"Jett"},{"name":"t","agent":"Killjoy"}]}]},
     }
   },
 }
