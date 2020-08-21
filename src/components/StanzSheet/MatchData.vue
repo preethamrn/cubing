@@ -58,7 +58,15 @@
                   <template  v-slot:activator='{on}'>
                     <v-icon v-on='on'>far fa-copy</v-icon>
                   </template>
-                  <span>Copy to clipboard</span>
+                  <span>Copy match data to clipboard</span>
+                </v-tooltip>
+              </v-btn>
+              <v-btn text @click='copyGameClipboard'>
+                <v-tooltip top>
+                  <template  v-slot:activator='{on}'>
+                    <v-icon v-on='on'>fas fa-copy</v-icon>
+                  </template>
+                  <span>Copy game data to clipboard</span>
                 </v-tooltip>
               </v-btn>
               <v-btn text @click='clearAutoSave'>
@@ -146,8 +154,31 @@ export default {
 
       navigator.clipboard.writeText(text)
     },
+    copyGameClipboard () {
+      if (!this.teamSelection.teams || !this.teamSelection.teams[0]) return
+
+      let text = this.teamSelection.map + '\t'
+      let scores = this.matchData.reduce((acc, v) => {
+        if (acc[v.winningTeam]) acc[v.winningTeam]++
+        else acc[v.winningTeam] = 1
+        return acc
+      }, {})
+      for (let i in this.teamSelection.teams) {
+        text += this.teamSelection.teams[i].team + '\t' + (scores[this.teamSelection.teams[i].team] || 0) + '\t'
+      }
+      text += '\n' + this.vodURL(0) + '\t'
+      for (let j in this.teamSelection.teams[0].players) {
+        for (let i in this.teamSelection.teams) {
+          text += this.teamSelection.teams[i].players[j].name + '\t' + this.teamSelection.teams[i].players[j].agent + '\t'
+        }
+        text += '\n\t'
+      }
+
+      navigator.clipboard.writeText(text)
+    },
     clearAutoSave () {
       localStorage.removeItem('stanz-sheet-match-data')
+      this.matchData = []
     },
     editRow (item) {
       this.firstBloodTeam = this.teamSelection.teams.findIndex(v => v.team === item.firstBloodTeam)
