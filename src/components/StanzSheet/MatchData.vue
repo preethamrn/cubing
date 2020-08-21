@@ -26,6 +26,12 @@
                     <v-btn v-for='type in roundTypes' :key='type'>{{type}}</v-btn>
                   </v-btn-toggle>
                 </v-row>
+                <h2>Spike Planted</h2>
+                <v-row class='pl-4'>
+                  <v-btn-toggle v-model='planted'>
+                    <v-btn v-for='type in plantedTypes' :key='type'>{{type}}</v-btn>
+                  </v-btn-toggle>
+                </v-row>
                 <h2>Round Winner</h2>
                 <v-row class='pb-4 pl-4'>
                   <v-btn-toggle v-model='winningTeam'>
@@ -99,17 +105,20 @@ export default {
         {text: 'First Blood Player', value: 'firstBloodPlayer'},
         {text: 'Round Type', value: 'roundType'},
         {text: 'Winning Team', value: 'winningTeam'},
+        {text: 'Planted Spike', value: 'planted'},
         {text: 'VOD', value: 'vodTime'}
       ],
       matchData: [],
       
       roundTypes: ['Pistol', 'Eco', 'Anti-Eco', 'Bonus', 'Anti-Bonus', 'Gun'],
+      plantedTypes: ['Y', 'N'],
 
       currentRound: -1,
       roundStartTime: '',
       firstBloodTeam: null,
       firstBloodPlayer: null,
       roundType: null,
+      planted: 1,
       winningTeam: null,
     }
   },
@@ -144,6 +153,7 @@ export default {
       this.firstBloodTeam = this.teamSelection.teams.findIndex(v => v.team === item.firstBloodTeam)
       this.firstBloodPlayer = this.teamSelection.teams[this.firstBloodTeam].players.findIndex(v => v.name === item.firstBloodPlayer)
       this.roundType = this.roundTypes.indexOf(item.roundType)
+      this.planted = this.plantedTypes.indexOf(item.planted)
       this.winningTeam = this.teamSelection.teams.findIndex(v => v.team === item.winningTeam)
       this.currentRound = item.num - 1
       this.roundStartTime = item.vodTime
@@ -155,6 +165,7 @@ export default {
         firstBloodTeam: this.teamSelection.teams[this.firstBloodTeam].team,
         firstBloodPlayer: this.teamSelection.teams[this.firstBloodTeam].players[this.firstBloodPlayer].name,
         roundType: this.roundTypes[this.roundType],
+        planted: this.plantedTypes[this.planted],
         winningTeam: this.teamSelection.teams[this.winningTeam].team,
         vodTime: this.roundStartTime,
       }
@@ -167,6 +178,7 @@ export default {
       this.firstBloodTeam = null
       this.firstBloodPlayer = null
       this.roundType = null
+      this.planted = 1
       this.winningTeam = null
       this.currentRound = this.matchData.length
       this.roundStartTime = this.currentVodTime()
