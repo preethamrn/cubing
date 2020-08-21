@@ -8,7 +8,7 @@
 
     <v-tabs-items v-model='tab'>
       <v-tab-item :key='0'><player-select v-model='teamSelection' /></v-tab-item>
-      <v-tab-item :key='1'><match-data :teamSelection='teamSelection' :vodType='teamSelection.vod.type' :vodID='teamSelection.vod.id' /></v-tab-item>
+      <v-tab-item :key='1'><match-data :teamSelection='teamSelection' :vodType='teamSelection.vod && teamSelection.vod.type' :vodID='teamSelection.vod && teamSelection.vod.id' /></v-tab-item>
     </v-tabs-items>
   </div>
 </template>
@@ -25,11 +25,18 @@ export default {
   },
   data () {
     return {
-      tab: 1,
-      //teamSelection: {},
-      teamSelection: {"vod": {"type": "youtube", "id": "U3N74KS2B-8"}, "map":"Split","teams":[{"team":"asdf","players":[{"name":"df","agent":"Reyna"},{"name":"2","agent":"Killjoy"},{"name":"3","agent":"Phoenix"},{"name":"5","agent":"Raze"},{"name":"6","agent":"Breach"}]},{"team":"fsd","players":[{"name":"q","agent":"Breach"},{"name":"w","agent":"Brimstone"},{"name":"e","agent":"Cypher"},{"name":"r","agent":"Jett"},{"name":"t","agent":"Killjoy"}]}]},
+      tab: 0,
+      teamSelection: {},
     }
   },
+  created () {
+    let data = localStorage.getItem('stanz-sheet-match-data')
+    if (data !== null) {
+      data = JSON.parse(data)
+      this.teamSelection = data.teamSelection
+      this.tab = 1
+    }
+  }
 }
 </script>
 

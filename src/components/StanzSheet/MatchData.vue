@@ -48,7 +48,20 @@
             <v-card-title>
               Data table
               <v-btn text @click='copyClipboard'>
-                <v-icon>far fa-copy</v-icon>
+                <v-tooltip top>
+                  <template  v-slot:activator='{on}'>
+                    <v-icon v-on='on'>far fa-copy</v-icon>
+                  </template>
+                  <span>Copy to clipboard</span>
+                </v-tooltip>
+              </v-btn>
+              <v-btn text @click='clearAutoSave'>
+                <v-tooltip top>
+                  <template  v-slot:activator='{on}'>
+                    <v-icon v-on='on'>far fa-trash-alt</v-icon>
+                  </template>
+                  <span>Delete auto-save</span>
+                </v-tooltip>
               </v-btn>
             </v-card-title>
             <v-data-table
@@ -124,6 +137,9 @@ export default {
 
       navigator.clipboard.writeText(text)
     },
+    clearAutoSave () {
+      localStorage.removeItem('stanz-sheet-match-data')
+    },
     editRow (item) {
       this.firstBloodTeam = this.teamSelection.teams.findIndex(v => v.team === item.firstBloodTeam)
       this.firstBloodPlayer = this.teamSelection.teams[this.firstBloodTeam].players.findIndex(v => v.name === item.firstBloodPlayer)
@@ -146,7 +162,6 @@ export default {
         this.matchData.push(item)
       } else {
         this.$set(this.matchData, this.currentRound, item)
-        // this.$forceUpdate()
       }
 
       this.firstBloodTeam = null
@@ -155,8 +170,24 @@ export default {
       this.winningTeam = null
       this.currentRound = this.matchData.length
       this.roundStartTime = this.currentVodTime()
+
+      localStorage.setItem('stanz-sheet-match-data', JSON.stringify({
+        currentRound: this.currentRound,
+        roundStartTime: this.roundStartTime,
+        matchData: this.matchData,
+        teamSelection: this.teamSelection,
+      }))
     }
   },
+  created () {
+    let data = localStorage.getItem('stanz-sheet-match-data')
+    if (data !== null) {
+      data = JSON.parse(data)
+      this.matchData = data.matchData
+      this.currentRound = data.currentRound
+      this.roundStartTime = data.roundStartTime
+    }
+  }
 }
 </script>
 
