@@ -55,6 +55,7 @@
               :headers='headers'
               :items='matchData'
               :items-per-page='Infinity'
+              @click:row='editRow'
               dense
               hide-default-footer
             >
@@ -123,22 +124,36 @@ export default {
 
       navigator.clipboard.writeText(text)
     },
+    editRow (item) {
+      this.firstBloodTeam = this.teamSelection.teams.findIndex(v => v.team === item.firstBloodTeam)
+      this.firstBloodPlayer = this.teamSelection.teams[this.firstBloodTeam].players.findIndex(v => v.name === item.firstBloodPlayer)
+      this.roundType = this.roundTypes.indexOf(item.roundType)
+      this.winningTeam = this.teamSelection.teams.findIndex(v => v.team === item.winningTeam)
+      this.currentRound = item.num - 1
+      this.roundStartTime = item.vodTime
+    },
     addRow () {
       if (this.firstBloodTeam === null || this.firstBloodPlayer === null || this.roundType === null || this.winningTeam === null) return
-      this.matchData.push({
+      let item = {
         num: this.currentRound + 1,
         firstBloodTeam: this.teamSelection.teams[this.firstBloodTeam].team,
         firstBloodPlayer: this.teamSelection.teams[this.firstBloodTeam].players[this.firstBloodPlayer].name,
         roundType: this.roundTypes[this.roundType],
         winningTeam: this.teamSelection.teams[this.winningTeam].team,
         vodTime: this.roundStartTime,
-      })
+      }
+      if (this.currentRound >= this.matchData.length) {
+        this.matchData.push(item)
+      } else {
+        this.$set(this.matchData, this.currentRound, item)
+        // this.$forceUpdate()
+      }
 
       this.firstBloodTeam = null
       this.firstBloodPlayer = null
       this.roundType = null
       this.winningTeam = null
-      this.currentRound++
+      this.currentRound = this.matchData.length
       this.roundStartTime = this.currentVodTime()
     }
   },
