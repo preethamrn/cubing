@@ -25,7 +25,7 @@ export default {
   },
   data () {
     return {
-      tab: 0,
+      tab: 1,
       //teamSelection: {},
       teamSelection: {"vod": {"type": "youtube", "id": "U3N74KS2B-8"}, "map":"Split","teams":[{"team":"asdf","players":[{"name":"df","agent":"Reyna"},{"name":"2","agent":"Killjoy"},{"name":"3","agent":"Phoenix"},{"name":"5","agent":"Raze"},{"name":"6","agent":"Breach"}]},{"team":"fsd","players":[{"name":"q","agent":"Breach"},{"name":"w","agent":"Brimstone"},{"name":"e","agent":"Cypher"},{"name":"r","agent":"Jett"},{"name":"t","agent":"Killjoy"}]}]},
     }

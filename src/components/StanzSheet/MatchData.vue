@@ -2,7 +2,7 @@
   <div class='match-data'>
     <v-container fluid>
       <v-row>
-        <v-col cols='4'>
+        <v-col cols='4' offset='1'>
           <v-card>
             <youtube v-if='vodType === "youtube"' :videoId='vodID' ref='youtubePlayer' class='video-player'></youtube>
             <vue-twitch-player v-if='vodType === "twitch"' width='640' height='360' :video='vodID' ref='twitchPlayer' class='video-player'></vue-twitch-player>
@@ -38,23 +38,31 @@
             <div v-else>
               <v-card-text>
                 <p>Set the VOD time to the start of the first round and then press START.</p>
-                <v-btn @click='currentRound = 0; roundStartTime = currentVodTime()'>START</v-btn>
+                <v-btn @click='currentRound = 0; roundStartTime = currentVodTime()'><b>START</b></v-btn>
               </v-card-text>
             </div>
           </v-card>
         </v-col>
-        <v-col cols='8'>
-          <v-data-table
-            :headers='headers'
-            :items='matchData'
-            :items-per-page='Infinity'
-            dense
-            hide-default-footer
-          >
-            <template v-slot:item.vodTime='{item}'>
-              <a :href='vodURL(item.vodTime)' target='_blank'>{{Math.floor(item.vodTime)}}</a>
-            </template>
-          </v-data-table>
+        <v-col cols='6'>
+          <v-card flat>
+            <v-card-title>
+              Data table
+              <v-btn text @click='copyClipboard'>
+                <v-icon>far fa-copy</v-icon>
+              </v-btn>
+            </v-card-title>
+            <v-data-table
+              :headers='headers'
+              :items='matchData'
+              :items-per-page='Infinity'
+              dense
+              hide-default-footer
+            >
+              <template v-slot:item.vodTime='{item}'>
+                <a :href='vodURL(item.vodTime)' target='_blank'>{{Math.floor(item.vodTime)}}</a>
+              </template>
+            </v-data-table>
+          </v-card>
         </v-col>
       </v-row>
     </v-container>
@@ -102,6 +110,18 @@ export default {
     },
     currentVodTime () {
       return this.vodType === 'youtube' ? this.$refs.youtubePlayer.player.getCurrentTime() : (this.vodType === 'twitch' ? this.$refs.twitchPlayer.getCurrentTime() : 0)
+    },
+    copyClipboard () {
+      let text = this.teamSelection.map + '\n'
+      for (let i in this.matchData) {
+        for (let j in this.headers) {
+          if (this.headers[j].value === 'vodTime') text += this.vodURL(this.matchData[i][this.headers[j].value]) + '\t'
+          else text += this.matchData[i][this.headers[j].value] + '\t'
+        }
+        text += '\n'
+      }
+
+      navigator.clipboard.writeText(text)
     },
     addRow () {
       if (this.firstBloodTeam === null || this.firstBloodPlayer === null || this.roundType === null || this.winningTeam === null) return
