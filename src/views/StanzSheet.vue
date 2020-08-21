@@ -8,7 +8,7 @@
 
     <v-tabs-items v-model='tab'>
       <v-tab-item :key='0'><player-select v-model='teamSelection' /></v-tab-item>
-      <v-tab-item :key='1'><match-data :teamSelection='teamSelection' /></v-tab-item>
+      <v-tab-item :key='1'><match-data :teamSelection='teamSelection' :vodType='teamSelection.vod.type' :vodID='teamSelection.vod.id' /></v-tab-item>
     </v-tabs-items>
   </div>
 </template>
@@ -25,9 +25,9 @@ export default {
   },
   data () {
     return {
-      tab: 1,
+      tab: 0,
       //teamSelection: {},
-      teamSelection: {"map":"Split","teams":[{"team":"asdf","players":[{"name":"df","agent":"Reyna"},{"name":"2","agent":"Killjoy"},{"name":"3","agent":"Phoenix"},{"name":"5","agent":"Raze"},{"name":"6","agent":"Breach"}]},{"team":"fsd","players":[{"name":"q","agent":"Breach"},{"name":"w","agent":"Brimstone"},{"name":"e","agent":"Cypher"},{"name":"r","agent":"Jett"},{"name":"t","agent":"Killjoy"}]}]},
+      teamSelection: {"vod": {"type": "youtube", "id": "U3N74KS2B-8"}, "map":"Split","teams":[{"team":"asdf","players":[{"name":"df","agent":"Reyna"},{"name":"2","agent":"Killjoy"},{"name":"3","agent":"Phoenix"},{"name":"5","agent":"Raze"},{"name":"6","agent":"Breach"}]},{"team":"fsd","players":[{"name":"q","agent":"Breach"},{"name":"w","agent":"Brimstone"},{"name":"e","agent":"Cypher"},{"name":"r","agent":"Jett"},{"name":"t","agent":"Killjoy"}]}]},
     }
   },
 }

@@ -2,31 +2,58 @@
   <div class='match-data'>
     <v-container fluid>
       <v-row>
-        <v-col cols='3'>
+        <v-col cols='4'>
           <v-card>
-            <v-card-title>Round {{matchData.length + 1}}</v-card-title>
-            <v-row>
-              <v-btn-toggle v-model='firstBloodTeam'>
-                <v-btn v-for='teamInfo in teamSelection.teams' :key='teamInfo.team'>{{teamInfo.team}}</v-btn>
-              </v-btn-toggle>
-              <v-btn-toggle v-model='firstBloodPlayer' v-if='firstBloodTeam !== null'>
-                <v-btn v-for='playerInfo in teamSelection.teams[firstBloodTeam].players' :key='playerInfo.name'>{{playerInfo.name}}</v-btn>
-              </v-btn-toggle>
-              <v-btn-toggle v-model='roundType'>
-                <v-btn v-for='type in roundTypes' :key='type'>{{type}}</v-btn>
-              </v-btn-toggle>
-              <v-btn-toggle v-model='winningTeam'>
-                <v-btn v-for='teamInfo in teamSelection.teams' :key='teamInfo.team'>{{teamInfo.team}}</v-btn>
-              </v-btn-toggle>
-            </v-row>
-            <v-btn @click='addRow'>Submit</v-btn>
+            <youtube v-if='vodType === "youtube"' :videoId='vodID' ref='youtubePlayer' class='video-player'></youtube>
+            <vue-twitch-player v-if='vodType === "twitch"' width='640' height='360' :video='vodID' ref='twitchPlayer' class='video-player'></vue-twitch-player>
+            <div v-if='currentRound !== -1'>
+              <v-card-title>Round {{currentRound + 1}}</v-card-title>
+              <v-card-text>
+                <h2>First Blood</h2>
+                <v-row class='pl-4'>
+                  <v-btn-toggle v-model='firstBloodTeam'>
+                    <v-btn v-for='teamInfo in teamSelection.teams' :key='teamInfo.team'>{{teamInfo.team}}</v-btn>
+                  </v-btn-toggle>
+                </v-row>
+                <v-row class='pl-4'>
+                  <v-btn-toggle v-model='firstBloodPlayer' v-if='firstBloodTeam !== null'>
+                    <v-btn v-for='playerInfo in teamSelection.teams[firstBloodTeam].players' :key='playerInfo.name'>{{playerInfo.name}}</v-btn>
+                  </v-btn-toggle>
+                </v-row>
+                <h2>Round Type</h2>
+                <v-row class='pl-4'>
+                  <v-btn-toggle v-model='roundType'>
+                    <v-btn v-for='type in roundTypes' :key='type'>{{type}}</v-btn>
+                  </v-btn-toggle>
+                </v-row>
+                <h2>Round Winner</h2>
+                <v-row class='pb-4 pl-4'>
+                  <v-btn-toggle v-model='winningTeam'>
+                    <v-btn v-for='teamInfo in teamSelection.teams' :key='teamInfo.team'>{{teamInfo.team}}</v-btn>
+                  </v-btn-toggle>
+                </v-row>
+                <v-btn @click='addRow'>Submit</v-btn>
+              </v-card-text>
+            </div>
+            <div v-else>
+              <v-card-text>
+                <p>Set the VOD time to the start of the first round and then press START.</p>
+                <v-btn @click='currentRound = 0; roundStartTime = currentVodTime()'>START</v-btn>
+              </v-card-text>
+            </div>
           </v-card>
         </v-col>
-        <v-col cols='9'>
+        <v-col cols='8'>
           <v-data-table
             :headers='headers'
             :items='matchData'
+            :items-per-page='Infinity'
+            dense
+            hide-default-footer
           >
+            <template v-slot:item.vodTime='{item}'>
+              <a :href='vodURL(item.vodTime)' target='_blank'>{{Math.floor(item.vodTime)}}</a>
+            </template>
           </v-data-table>
         </v-col>
       </v-row>
@@ -35,21 +62,29 @@
 </template>
 
 <script>
+import VueTwitchPlayer from 'vue-twitch-player'
+
 export default {
   name: 'match-data',
+  components: {
+    VueTwitchPlayer,
+  },
   data () {
     return {
       headers: [
-        {name: '#', value: 'num'},
-        {name: 'First Blood Team', value: 'firstBloodTeam'},
-        {name: 'First Blood Player', value: 'firstBloodPlayer'},
-        {name: 'Round Type', value: 'roundType'},
-        {name: 'Winning Team', value: 'winningTeam'},
+        {text: '#', value: 'num'},
+        {text: 'First Blood Team', value: 'firstBloodTeam'},
+        {text: 'First Blood Player', value: 'firstBloodPlayer'},
+        {text: 'Round Type', value: 'roundType'},
+        {text: 'Winning Team', value: 'winningTeam'},
+        {text: 'VOD', value: 'vodTime'}
       ],
       matchData: [],
       
       roundTypes: ['Pistol', 'Eco', 'Anti-Eco', 'Bonus', 'Anti-Bonus', 'Gun'],
 
+      currentRound: -1,
+      roundStartTime: '',
       firstBloodTeam: null,
       firstBloodPlayer: null,
       roundType: null,
@@ -58,27 +93,41 @@ export default {
   },
   props: {
     teamSelection: Object,
+    vodType: String,
+    vodID: String,
   },
   methods: {
+    vodURL (time) {
+      return this.vodType === 'youtube' ? `https://youtu.be/${this.vodID}?t=${Math.floor(time)}` : (this.vodType === 'twitch' ? `https://www.twitch.tv/videos/${this.vodID}?t=${Math.floor(time)}s` : '')
+    },
+    currentVodTime () {
+      return this.vodType === 'youtube' ? this.$refs.youtubePlayer.player.getCurrentTime() : (this.vodType === 'twitch' ? this.$refs.twitchPlayer.getCurrentTime() : 0)
+    },
     addRow () {
       if (this.firstBloodTeam === null || this.firstBloodPlayer === null || this.roundType === null || this.winningTeam === null) return
       this.matchData.push({
-        num: this.matchData.length + 1,
+        num: this.currentRound + 1,
         firstBloodTeam: this.teamSelection.teams[this.firstBloodTeam].team,
         firstBloodPlayer: this.teamSelection.teams[this.firstBloodTeam].players[this.firstBloodPlayer].name,
         roundType: this.roundTypes[this.roundType],
         winningTeam: this.teamSelection.teams[this.winningTeam].team,
+        vodTime: this.roundStartTime,
       })
 
       this.firstBloodTeam = null
       this.firstBloodPlayer = null
       this.roundType = null
       this.winningTeam = null
+      this.currentRound++
+      this.roundStartTime = this.currentVodTime()
     }
   },
 }
 </script>
 
 <style scoped>
-
+.video-player {
+  width: fit-content;
+  margin: auto;
+}
 </style>

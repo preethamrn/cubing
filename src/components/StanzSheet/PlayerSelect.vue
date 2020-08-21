@@ -55,6 +55,11 @@
           </v-col>
         </v-row>
       </v-container>
+
+      <v-stepper-step step='4'>VOD URL (optional)</v-stepper-step>
+      <v-container>
+        <v-text-field v-model='vodURL' label='URL' outlined></v-text-field>
+      </v-container>
     </v-stepper>
   </div>
 </template>
@@ -70,6 +75,7 @@ export default {
     return {
       step: 1,
       map: 'Ascent',
+      vodURL: '',
       teams: [{team: '', players: [{}, {}, {}, {}, {}]}, {team: '', players: [{}, {}, {}, {}, {}]}], // list of player objects {name, agent}
       currentlySelectingPlayer: [1, 1],
     }
@@ -93,8 +99,24 @@ export default {
       return this.teams[0].team + this.teams[1].team
     },
     teamSelection () {
+      let vodID = ''
+      let vodType = ''
+      const hostname = this.vodURL.replace('http://','').replace('https://','').replace('www.','').split(/[/?#]/)[0]
+      if (hostname === 'youtube.com' || hostname === 'youtu.be') {
+        vodType = 'youtube'
+        vodID = this.$youtube.getIdFromURL(this.vodURL)
+      } else if (hostname === 'twitch.tv' || hostname === 'twitch.com') {
+        vodType = 'twitch'
+        const parts = this.vodURL.split(/\//)
+        vodID = parts[parts.length - 1]
+      }
+
       return {
         map: this.map,
+        vod: {
+          type: vodType,
+          id: vodID,
+        },
         teams: this.teams,
       }
     }
