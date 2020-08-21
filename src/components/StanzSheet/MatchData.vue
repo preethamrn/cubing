@@ -2,10 +2,10 @@
   <div class='match-data'>
     <v-container fluid>
       <v-row>
-        <v-col cols='4' offset='1'>
+        <v-col cols='6' offset='1'>
           <v-card>
-            <youtube v-if='vodType === "youtube"' :videoId='vodID' ref='youtubePlayer' class='video-player'></youtube>
-            <vue-twitch-player v-if='vodType === "twitch"' width='640' height='360' :video='vodID' ref='twitchPlayer' class='video-player'></vue-twitch-player>
+            <youtube v-if='vodType === "youtube"' :player-width='playerWidth' :player-height='playerHeight' :videoId='vodID' ref='youtubePlayer' class='video-player'></youtube>
+            <vue-twitch-player v-if='vodType === "twitch"' :width='playerWidth' :height='playerHeight' :video='vodID' ref='twitchPlayer' class='video-player'></vue-twitch-player>
             <div v-if='currentRound !== -1'>
               <v-card-title>Round {{currentRound + 1}}</v-card-title>
               <v-card-text>
@@ -49,7 +49,7 @@
             </div>
           </v-card>
         </v-col>
-        <v-col cols='6'>
+        <v-col cols='5'>
           <v-card flat>
             <v-card-title>
               Data table
@@ -87,7 +87,7 @@
               hide-default-footer
             >
               <template v-slot:item.vodTime='{item}'>
-                <a :href='vodURL(item.vodTime)' target='_blank'>{{Math.floor(item.vodTime)}}</a>
+                <a :href='vodURL(item.vodTime)' target='_blank'>{{Math.floor(item.vodTime)}}s</a>
               </template>
             </v-data-table>
           </v-card>
@@ -107,6 +107,9 @@ export default {
   },
   data () {
     return {
+      playerWidth: 854,
+      playerHeight: 480,
+
       headers: [
         {text: '#', value: 'num'},
         {text: 'First Blood Team', value: 'firstBloodTeam'},
@@ -114,7 +117,7 @@ export default {
         {text: 'Round Type', value: 'roundType'},
         {text: 'Winning Team', value: 'winningTeam'},
         {text: 'Planted Spike', value: 'planted'},
-        {text: 'VOD', value: 'vodTime'}
+        {text: 'VOD Time', value: 'vodTime'}
       ],
       matchData: [],
       
@@ -230,6 +233,8 @@ export default {
       this.currentRound = data.currentRound
       this.roundStartTime = data.roundStartTime
     }
+    this.playerHeight = window.innerHeight / 2
+    this.playerWidth = this.playerHeight * 16/9
   }
 }
 </script>

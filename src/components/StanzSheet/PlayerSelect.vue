@@ -79,6 +79,9 @@
 
 <script>
 import AgentSelect from '@/components/StanzSheet/AgentSelect'
+
+const defaultPlayersList = {"Gen G": ["effys", "gMd", "huynh", "MkaeL", "PLAYER1"], "TSM": ["Wardell", "Subroza", "drone", "hazed", "reltuC"]}
+
 export default {
   name: 'player-select',
   components: {
@@ -99,6 +102,12 @@ export default {
     teamSelection: {
       deep: true,
       handler () {
+        if (defaultPlayersList[this.teams[0].team] && !this.teams[0].players[0].name) {
+          this.teams[0].players = defaultPlayersList[this.teams[0].team].map(v => ({name: v}))
+        }
+        if (defaultPlayersList[this.teams[1].team] && !this.teams[1].players[1].name) {
+          this.teams[1].players = defaultPlayersList[this.teams[1].team].map(v => ({name: v}))
+        }
         this.$emit('input', this.teamSelection)
       }
     }
