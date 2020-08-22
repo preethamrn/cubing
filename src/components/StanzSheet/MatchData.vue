@@ -12,30 +12,30 @@
                 <h2>First Blood</h2>
                 <v-row class='pl-4'>
                   <v-btn-toggle v-model='firstBloodTeam'>
-                    <v-btn v-for='teamInfo in teamSelection.teams' :key='teamInfo.team'>{{teamInfo.team}}</v-btn>
+                    <v-btn v-for='teamInfo in teamSelection.teams' :key='teamInfo.team' class='no-uppercase'>{{teamInfo.team}}</v-btn>
                   </v-btn-toggle>
                 </v-row>
                 <v-row class='pl-4'>
                   <v-btn-toggle v-model='firstBloodPlayer' v-if='firstBloodTeam !== null'>
-                    <v-btn v-for='playerInfo in teamSelection.teams[firstBloodTeam].players' :key='playerInfo.name'>{{playerInfo.name}}</v-btn>
+                    <v-btn v-for='playerInfo in teamSelection.teams[firstBloodTeam].players' :key='playerInfo.name' class='no-uppercase'>{{playerInfo.name}}</v-btn>
                   </v-btn-toggle>
                 </v-row>
                 <h2>Round Type</h2>
                 <v-row class='pl-4'>
                   <v-btn-toggle v-model='roundType'>
-                    <v-btn v-for='type in roundTypes' :key='type'>{{type}}</v-btn>
+                    <v-btn v-for='type in roundTypes' :key='type' class='no-uppercase'>{{type}}</v-btn>
                   </v-btn-toggle>
                 </v-row>
                 <h2>Spike Planted</h2>
                 <v-row class='pl-4'>
                   <v-btn-toggle v-model='planted'>
-                    <v-btn v-for='type in plantedTypes' :key='type'>{{type}}</v-btn>
+                    <v-btn v-for='type in plantedTypes' :key='type' class='no-uppercase'>{{type}}</v-btn>
                   </v-btn-toggle>
                 </v-row>
                 <h2>Round Winner</h2>
                 <v-row class='pb-4 pl-4'>
                   <v-btn-toggle v-model='winningTeam'>
-                    <v-btn v-for='teamInfo in teamSelection.teams' :key='teamInfo.team'>{{teamInfo.team}}</v-btn>
+                    <v-btn v-for='teamInfo in teamSelection.teams' :key='teamInfo.team' class='no-uppercase'>{{teamInfo.team}}</v-btn>
                   </v-btn-toggle>
                 </v-row>
                 <v-btn @click='addRow'>Submit</v-btn>
@@ -243,5 +243,8 @@ export default {
 .video-player {
   width: fit-content;
   margin: auto;
+}
+.no-uppercase {
+  text-transform: none;
 }
 </style>
