@@ -5,7 +5,7 @@
         <v-col cols='6' offset='1'>
           <v-card>
             <youtube v-if='vodType === "youtube"' :player-width='playerWidth' :player-height='playerHeight' :videoId='vodID' ref='youtubePlayer' class='video-player'></youtube>
-            <vue-twitch-player v-if='vodType === "twitch"' :width='playerWidth' :height='playerHeight' :video='vodID' ref='twitchPlayer' class='video-player'></vue-twitch-player>
+            <vue-twitch-player v-if='vodType === "twitch"' :width='playerWidth.toString()' :height='playerHeight.toString()' :video='vodID' ref='twitchPlayer' class='video-player'></vue-twitch-player>
             <div v-if='currentRound !== -1'>
               <v-card-title>Round {{currentRound + 1}}</v-card-title>
               <v-card-text>

@@ -80,7 +80,7 @@
 <script>
 import AgentSelect from '@/components/StanzSheet/AgentSelect'
 
-const defaultPlayersList = {"Gen G": ["effys", "gMd", "huynh", "MkaeL", "PLAYER1"], "TSM": ["Wardell", "Subroza", "drone", "hazed", "reltuC"]}
+const _stanzSheetTeamDefaults = 'stanz-sheet-team-defaults'
 
 export default {
   name: 'player-select',
@@ -93,6 +93,8 @@ export default {
       vodURL: '',
       teams: [{team: '', players: [{}, {}, {}, {}, {}]}, {team: '', players: [{}, {}, {}, {}, {}]}], // list of player objects {name, agent}
       currentlySelectingPlayer: [1, 1],
+
+      defaultPlayersList: {},
     }
   },
   props: {
@@ -102,12 +104,24 @@ export default {
     teamSelection: {
       deep: true,
       handler () {
-        if (defaultPlayersList[this.teams[0].team] && !this.teams[0].players[0].name) {
-          this.teams[0].players = defaultPlayersList[this.teams[0].team].map(v => ({name: v}))
+        // Check if default exists and players haven't yet been set
+        if (this.defaultPlayersList[this.teams[0].team] && !this.teams[0].players[0].name) {
+          this.teams[0].players = this.defaultPlayersList[this.teams[0].team].map(v => ({name: v}))
         }
-        if (defaultPlayersList[this.teams[1].team] && !this.teams[1].players[1].name) {
-          this.teams[1].players = defaultPlayersList[this.teams[1].team].map(v => ({name: v}))
+        if (this.defaultPlayersList[this.teams[1].team] && !this.teams[1].players[1].name) {
+          this.teams[1].players = this.defaultPlayersList[this.teams[1].team].map(v => ({name: v}))
         }
+
+        // Check if all players have been set => update defaults
+        if (this.teams[0].team && this.teams[0].team.length > 2 && this.teams[0].players.filter(v => v.name).length === 5 && (!this.defaultPlayersList[this.teams[0].team] || this.defaultPlayersList[this.teams[0].team].filter((v, i) => v !== this.teams[0].players[i].name).length > 0))  {
+          this.defaultPlayersList[this.teams[0].team] = this.teams[0].players.map(v => v.name)
+          localStorage.setItem(_stanzSheetTeamDefaults, JSON.stringify(this.defaultPlayersList))
+        }
+        if (this.teams[1].team && this.teams[1].team.length > 2 && this.teams[1].players.filter(v => v.name).length === 5 && (!this.defaultPlayersList[this.teams[1].team] || this.defaultPlayersList[this.teams[1].team].filter((v, i) => v !== this.teams[1].players[i].name).length > 0))  {
+          this.defaultPlayersList[this.teams[1].team] = this.teams[1].players.map(v => v.name)
+          localStorage.setItem(_stanzSheetTeamDefaults, JSON.stringify(this.defaultPlayersList))
+        }
+
         this.$emit('input', this.teamSelection)
       }
     }
@@ -135,7 +149,17 @@ export default {
         teams: this.teams,
       }
     }
-  }
+  },
+  created () {
+    let defaults = localStorage.getItem(_stanzSheetTeamDefaults)
+    if (defaults === null) {
+      defaults =  {"Gen G": ["effys", "gMd", "huynh", "MkaeL", "PLAYER1"], "TSM": ["Wardell", "Subroza", "drone", "hazed", "reltuC"]}
+      localStorage.setItem(_stanzSheetTeamDefaults, JSON.stringify(defaults))
+    } else {
+      defaults = JSON.parse(defaults)
+    }
+    this.defaultPlayersList = defaults
+  },
 }
 </script>
 
