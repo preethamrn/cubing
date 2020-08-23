@@ -26,6 +26,12 @@
                     <v-btn v-for='type in roundTypes' :key='type' class='no-uppercase'>{{type}}</v-btn>
                   </v-btn-toggle>
                 </v-row>
+                <h2>Round MVP</h2>
+                <v-row class='pl-4'>
+                  <v-btn-toggle v-model='roundMVP'>
+                    <v-btn v-for='player in allPlayers' :key='player.name' class='no-uppercase'>{{player.name}}</v-btn>
+                  </v-btn-toggle>
+                </v-row>
                 <h2>Spike Planted</h2>
                 <v-row class='pl-4'>
                   <v-btn-toggle v-model='planted'>
@@ -115,6 +121,8 @@ export default {
         {text: 'First Blood Team', value: 'firstBloodTeam'},
         {text: 'First Blood Player', value: 'firstBloodPlayer'},
         {text: 'Round Type', value: 'roundType'},
+        {text: 'Round MVP', value: 'roundMVP'},
+        {text: 'Round MVP Agent', value: 'roundMVPAgent'},
         {text: 'Winning Team', value: 'winningTeam'},
         {text: 'Planted Spike', value: 'planted'},
         {text: 'VOD Time', value: 'vodTime'}
@@ -129,6 +137,7 @@ export default {
       firstBloodTeam: null,
       firstBloodPlayer: null,
       roundType: null,
+      roundMVP: null,
       planted: 1,
       winningTeam: null,
     }
@@ -187,18 +196,21 @@ export default {
       this.firstBloodTeam = this.teamSelection.teams.findIndex(v => v.team === item.firstBloodTeam)
       this.firstBloodPlayer = this.teamSelection.teams[this.firstBloodTeam].players.findIndex(v => v.name === item.firstBloodPlayer)
       this.roundType = this.roundTypes.indexOf(item.roundType)
+      this.roundMVP = this.allPlayers.findIndex(v => v.name === item.roundMVP)
       this.planted = this.plantedTypes.indexOf(item.planted)
       this.winningTeam = this.teamSelection.teams.findIndex(v => v.team === item.winningTeam)
       this.currentRound = item.num - 1
       this.roundStartTime = item.vodTime
     },
     addRow () {
-      if (this.firstBloodTeam === null || this.firstBloodPlayer === null || this.roundType === null || this.winningTeam === null) return
+      if (this.firstBloodTeam === null || this.firstBloodPlayer === null || this.roundType === null || this.roundMVP === null || this.winningTeam === null) return
       let item = {
         num: this.currentRound + 1,
         firstBloodTeam: this.teamSelection.teams[this.firstBloodTeam].team,
         firstBloodPlayer: this.teamSelection.teams[this.firstBloodTeam].players[this.firstBloodPlayer].name,
         roundType: this.roundTypes[this.roundType],
+        roundMVP: this.allPlayers[this.roundMVP].name,
+        roundMVPAgent: this.allPlayers[this.roundType].agent,
         planted: this.plantedTypes[this.planted],
         winningTeam: this.teamSelection.teams[this.winningTeam].team,
         vodTime: this.roundStartTime,
@@ -223,6 +235,11 @@ export default {
         matchData: this.matchData,
         teamSelection: this.teamSelection,
       }))
+    }
+  },
+  computed: {
+    allPlayers () {
+      return this.teamSelection.teams[0].players.concat(this.teamSelection.teams[1].players)
     }
   },
   created () {
