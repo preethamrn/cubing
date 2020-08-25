@@ -8,7 +8,7 @@
           <v-container class='pa-2'>
             <v-row justify='start'>
               <v-col
-                v-for='mapData in [{name: "Ascent", img: "https://liquipedia.net/commons/images/9/94/Ascent_Map_Banner.png"}, {name: "Bind", img: "https://liquipedia.net/commons/images/b/bf/Bind_Map_Banner.png"}, {name: "Haven", img: "https://liquipedia.net/commons/images/2/28/Haven_Map_Banner.png"}, {name: "Split", img: "https://liquipedia.net/commons/images/4/4c/Split_Map_Banner.png"}]'
+                v-for='mapData in [{name: "Ascent", img: "valorant/Ascent_Map_Banner.png"}, {name: "Bind", img: "valorant/Bind_Map_Banner.png"}, {name: "Haven", img: "valorant/Haven_Map_Banner.png"}, {name: "Split", img: "valorant/Split_Map_Banner.png"}]'
                 :key='mapData.name'
                 cols='12'
                 md='6'
