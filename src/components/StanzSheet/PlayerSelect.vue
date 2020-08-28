@@ -135,7 +135,7 @@ export default {
         vodType = 'youtube'
         vodID = this.$youtube.getIdFromURL(this.vodURL)
       } else if (hostname === 'twitch.tv' || hostname === 'twitch.com') {
-        vodType = 'twitch'
+        vodType = this.vodURL.include('videos') ? 'twitch' : 'twitchchan'
         const parts = this.vodURL.split(/\//)
         vodID = parts[parts.length - 1]
       }

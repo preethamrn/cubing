@@ -6,6 +6,7 @@
           <v-card>
             <youtube v-if='vodType === "youtube"' :player-width='playerWidth' :player-height='playerHeight' :videoId='vodID' ref='youtubePlayer' class='video-player'></youtube>
             <vue-twitch-player v-if='vodType === "twitch"' :width='playerWidth.toString()' :height='playerHeight.toString()' :video='vodID' ref='twitchPlayer' class='video-player'></vue-twitch-player>
+            <vue-twitch-player v-if='vodType === "twitchchan"' :width='playerWidth.toString()' :height='playerHeight.toString()' :channel='vodID' ref='twitchPlayer' class='video-player'></vue-twitch-player>
             <div v-if='currentRound !== -1'>
               <v-card-title>Round {{currentRound + 1}}</v-card-title>
               <v-card-text>
@@ -149,16 +150,16 @@ export default {
   },
   methods: {
     vodURL (time) {
-      return this.vodType === 'youtube' ? `https://youtu.be/${this.vodID}?t=${Math.floor(time)}` : (this.vodType === 'twitch' ? `https://www.twitch.tv/videos/${this.vodID}?t=${Math.floor(time)}s` : '')
+      return this.vodType === 'youtube' ? `https://youtu.be/${this.vodID}?t=${Math.floor(time)}` : (this.vodType === 'twitch' ? `https://www.twitch.tv/videos/${this.vodID}?t=${Math.floor(time)}s` : (this.vodType === 'twitchchan' ? `https://www.twitch.tv/videos/FILLTHISIN?t=${Math.floor(time)}s` : ''))
     },
     currentVodTime () {
-      return this.vodType === 'youtube' ? this.$refs.youtubePlayer.player.getCurrentTime() : (this.vodType === 'twitch' ? this.$refs.twitchPlayer.getCurrentTime() : 0)
+      return this.vodType === 'youtube' ? this.$refs.youtubePlayer.player.getCurrentTime() : (this.vodType === 'twitch' ? this.$refs.twitchPlayer.getCurrentTime() : (this.vodType === 'twitchchan' ? this.$refs.twitchPlayer.getCurrentTime() : 0))
     },
     copyClipboard () {
       let text = this.teamSelection.map + '\n'
       for (let i in this.matchData) {
         for (let j in this.headers) {
-          if (this.headers[j].value === 'vodTime') text += this.vodURL(this.matchData[i][this.headers[j].value]) + '\t'
+          if (this.headers[j].value === 'vodTime') text += (this.vodType === 'twitchchan' ? this.matchData[i][this.headers[j].value] : this.vodURL(this.matchData[i][this.headers[j].value])) + '\t'
           else text += this.matchData[i][this.headers[j].value] + '\t'
         }
         text += '\n'
