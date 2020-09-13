@@ -4,7 +4,10 @@
       <v-bottom-sheet v-model='dialog' scrollable>
         <template v-slot:activator='{on}'>
           <v-layout row style='padding: 20px 0 20px 0'>
-            <v-flex xs5><h1>3BLD Trainer</h1></v-flex>
+            <v-flex xs5>
+              <h1>3BLD Trainer</h1>
+              <vue-kofi uid='preetham' />
+            </v-flex>
             <v-flex xs7><v-btn color='blue' style='font-weight: bold !important; font-family: "Lucida Console", Monaco, monospace !important;' dark v-on='on'>Settings</v-btn></v-flex>
           </v-layout>
         </template>
@@ -80,6 +83,7 @@
 </template>
 
 <script>
+import VueKofi from 'vue-kofi'
 Number.prototype.pad = function(size) {
     var s = String(this);
     while (s.length < (size || 2)) {s = "0" + s;}
@@ -88,6 +92,9 @@ Number.prototype.pad = function(size) {
 
 export default {
   name: 'BLDTrainer3',
+  components: {
+    VueKofi,
+  },
   data: () => ({
     colors: {
       'U': 'white',

@@ -1,6 +1,7 @@
 <template>
   <v-container class='median'>
     <input type='file' @change='onChooseFile' />
+    <vue-kofi style='margin: 10px 0 20px 20px;' uid='preetham' />
     <v-card>
       <v-card-title>
         RESULTS (note: these aren't official results. make sure to double check before submitting)
@@ -37,8 +38,12 @@
 </template>
 
 <script>
+import VueKofi from 'vue-kofi'
 export default {
   name: 'median',
+  components: {
+    VueKofi,
+  },
   data () {
     return {
       solveCount: 25,

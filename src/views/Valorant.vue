@@ -4,7 +4,10 @@
       <d3-network :net-nodes='nodes' :net-links='links' :options='options' @node-click='highlightNode' />
     </div>
     <v-card class='info-box'>
-      <v-card-title><img src='valorant.png' style='padding-right: 10px;' /><h1>Valorant Player History</h1></v-card-title>
+      <v-card-title>
+        <img src='valorant.png' style='padding-right: 10px;' /><h1>Valorant Player History</h1>
+        <vue-kofi uid='preetham' />
+      </v-card-title>
       <v-autocomplete
           v-model='search'
           :items='searchItems'
@@ -44,6 +47,7 @@
 </template>
 
 <script>
+import VueKofi from 'vue-kofi'
 import interact from 'interactjs'
 import D3Network from 'vue-d3-network'
 
@@ -53,6 +57,7 @@ const transferTeams = {"None": ["kazuMaybe", "ANGE1", "BennY", "kaplan", "Elevat
 export default {
   name: 'valorant',
   components: {
+    VueKofi,
     D3Network,
   },
   data () {

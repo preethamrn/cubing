@@ -1,6 +1,9 @@
 <template>
   <div class='stanz-sheet'>
-    <h1>Stanz's Spreadsheet</h1>
+    <v-row>
+      <h1>Stanz's Spreadsheet</h1>
+      <vue-kofi style='margin: 20px 0 0 20px;' uid='preetham' />
+    </v-row>
     <v-tabs v-model='tab' background-color='deep-purple accent-4' class='elevation-2' dark grow>
       <v-tab :key='0'>Team Select</v-tab>
       <v-tab :key='1'>Match Data</v-tab>
@@ -14,12 +17,14 @@
 </template>
 
 <script>
+import VueKofi from 'vue-kofi'
 import PlayerSelect from '@/components/StanzSheet/PlayerSelect'
 import MatchData from '@/components/StanzSheet/MatchData'
 
 export default {
   name: 'stanz-sheet',
   components: {
+    VueKofi,
     PlayerSelect,
     MatchData,
   },
