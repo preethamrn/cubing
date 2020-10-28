@@ -1,9 +1,8 @@
 <template>
   <div class="scramble">
-    <span v-for='(move, index) in scramble' :key='index'>
-      {{move}}&nbsp;
-    </span>
     <div> {{processedMoves}} </div>
+    <div> {{scramble}} </div>
+    <div> {{difference}} </div>
   </div>
 </template>
 
@@ -11,11 +10,11 @@
 export default {
   name: "scramble",
   data: () => ({
-    processedMoves: '',
+    processedMoves: [],
   }),
   props: {
     moves: Array,
-    scramble: Array,
+    scramble: String,
   },
   watch: {
     moves () {
@@ -32,9 +31,50 @@ export default {
           processed.push(Object.assign({}, move))
         }
       })
-      this.processedMoves = processed.filter(v => v.amount).map(v => (v.family + (v.amount === -1 ? "'" : (v.amount === 1 ? '' : v.amount)))).reduce((acc, v) => (acc + v + ' '), '')
+      // TODO: fix processedMoves to support canceling recursively (ie. F R' U U' R F => F2)
+      this.processedMoves = processed.filter(v => v.amount)
     }
   },
+  computed: {
+    processedScramble () {
+      return this.scramble.split(' ').map((v) => {
+        const matches = v.match(/^([RUFLDB])(.?)$/)
+        if (!matches) return {} // TODO: handle this error case
+        return {
+          family: matches[1],
+          amount: matches[2] === '2' ? 2 : (matches[2] === "'" ? -1 : matches[2] === "" ? 1 : 4),
+        }
+      })
+    },
+    difference () {
+      let i = 0, j = 0
+      let partial = []
+      while (i < this.processedMoves.length && i < this.processedScramble.length) {
+        if (this.processedMoves[i].family === this.processedScramble[i].family) {
+          if (this.processedMoves[i].amount !== this.processedScramble[i].amount) {
+            partial = [this.processedScramble[i]]
+            i++
+            break
+          }
+        } else {
+          j = i
+          break
+        }
+        i++
+        j = i
+      }
+      let correct = this.processedMoves.slice(0, j)
+      let todo = this.processedScramble.slice(i, this.processedScramble.length)
+      let incorrect = this.processedMoves.slice(i, this.processedMoves.length)
+      incorrect.reverse()
+      return {
+        correct,
+        incorrect,
+        todo,
+        partial,
+      }
+    }
+  }
 }
 </script>
 

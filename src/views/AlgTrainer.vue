@@ -32,7 +32,7 @@ export default {
   },
   data: () => ({
     twistyPlayer: null,
-    scramble: ["R", "U2", "R'", "U2", "R'", "U'", "R", "U", "R", "U'", "R'", "U2", "R'", "U2", "R"],
+    scramble: "R U2 R' U2 R' U' R U R U' R' U2 R' U2 R",
     moves: [],
   }),
   methods: {
@@ -52,6 +52,7 @@ export default {
   mounted () {
     document.addEventListener('keydown', (e) => {
       console.log(e)
+      if ('urfdlbURFDLB'.split('').includes(e.key)) this.moves.push({family: e.key.toUpperCase(), amount: 1})
     })
     this.twistyPlayer = new TwistyPlayer({ alg: new Sequence([]) })
     document.querySelector('#twisty').appendChild(this.twistyPlayer)
