@@ -31,7 +31,7 @@ export default {
     Scramble,
   },
   data: () => ({
-    twistyPlayer: null,
+    twistyPlayer: null, // TODO: display just the cube and not the entire player window
     scramble: "R U2 R' U2 R' U' R U R U' R' U2 R' U2 R",
     moves: [],
   }),
@@ -42,6 +42,7 @@ export default {
       window.puzzle.addMoveListener((e) => {
         this.twistyPlayer.experimentalAddMove(e.latestMove)
         this.moves.push(e.latestMove)
+        // TODO: use cubing/kpuzzle or cube.js to figure out if the cube is in a solved state after applying all the moves.
         console.log(e.latestMove)
       })
       // window.puzzle.addOrientationListener(() => {

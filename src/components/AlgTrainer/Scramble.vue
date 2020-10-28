@@ -17,6 +17,7 @@ export default {
     scramble: String,
   },
   watch: {
+    // TODO: figure out if there's a way to simplify all this using the cubing/alg library
     moves () {
       let processed = []
       let lastMove = '-'
