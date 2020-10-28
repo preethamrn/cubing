@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "cubing": "^0.12.17",
     "interactjs": "^1.9.21",
     "vue": "^2.6.11",
     "vue-d3-network": "^0.1.28",

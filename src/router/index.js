@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '../views/HomePage.vue'
+const AlgTrainer = () => import( '../views/AlgTrainer.vue')
 const TBLDTrainer = () => import( '../views/3BLDTrainer.vue')
 const Median = () => import( '../views/Median.vue')
 const Valorant = () => import( '../views/Valorant.vue')
@@ -15,6 +16,12 @@ const router = new Router({
       path: '/',
       name: 'preethamrn',
       component: Home
+    },
+    {
+      path: '/algtrainer',
+      name: 'Alg Trainer',
+      component: AlgTrainer,
+      meta: {title: 'Alg Trainer'},
     },
     {
       path: '/3bldtrainer',
