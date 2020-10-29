@@ -49,6 +49,7 @@ export default {
     processedScramble () {
       return parse(this.scramble).nestedUnits
     },
+    // TODO: process wide moves, slice moves, and rotations.
     difference () {
       let i = 0, j = 0
       let partial = []

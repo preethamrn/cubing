@@ -1,9 +1,10 @@
 <template>
   <div class="algtrainer">
     <button @click='connect'>Connect</button>
-    <scramble :scramble='scramble' :moves='moves' />
+    <scramble :scramble='item.alg' :moves='moves' />
     <div id='twisty'></div>
     <div>{{elapsedTime}}</div>
+    <div>{{item}}</div>
   </div>
 </template>
 
@@ -28,6 +29,30 @@ async function asyncSetup(twistyPlayer) {
   })
 }
 
+const COLL_LIST = [{ name: "B1", alg: "R' U' R U' R' U2 R" }, { name: "B2", alg: "y R' U' R U' R' U R' D' R U R' D R2" }, { name: "B3", alg: "L R' U' R U L' U2 R' U2 R" }, { name: "B4", alg: "R' U' R U R' F R U R' U' R' F' R2" }, { name: "B5", alg: "R' U L U' R U L'" }, { name: "B6", alg: "R U' R' U2 R U' R' U2 R' D' R U R' D R" }, { name: "C1", alg: "R U R' U R U2 R'" }, { name: "C2", alg: "L' U2 L U2 R U' L' U L R'" }, { name: "C3", alg: "L' R U R' U' L U2 R U2 R'" }, { name: "C4", alg: "y' R U R' U R U' R D R' U' R D' R2" }, { name: "C5", alg: "R U' L' U R' U' L" }, { name: "C6", alg: "F' R U2 R' U2 R' F2 R U R U' R' F'" }, { name: "D1", alg: "y' R U2 R' U' R U R' U' R U R' U' R U' R'" }, { name: "D2", alg: "R' U2 R' D' R U2 R' D R2" }, { name: "D3", alg: "y R U2 R D R' U2 R D' R2" }, { name: "D4", alg: "x' R U' R' D R U R' D' x" }, { name: "D5", alg: "y2 F' r U R' U' r' F R" }, { name: "D6", alg: "y' R' U' R U R' F' R U R' U' R' F R2" }, { name: "E1", alg: "R' U' R U' R' U2 R2 U R' U R U2 R'" }, { name: "E2", alg: "R' F R U' R' U' R U R' F' R U R' U' R' F R F' R" }, { name: "E3", alg: "y2 R2 D R' U2 R D' R' U2 R'" }, { name: "E4", alg: "F R U' R' U R U R' U R U' R' F'" }, { name: "E5", alg: "R2 D' R U2 R' D R U2 R" }, { name: "E6", alg: "R' U2 R F U' R' U' R U F'" }, { name: "F1", alg: "R U2 R' U' R U' R2 U2 R U R' U R" }, { name: "F2", alg: "R' U R U2 R' L' U R U' L" }, { name: "F3", alg: "y l' U' L U R U' r' F" }, { name: "F4", alg: "y2 F R U R' U' R U' R' U' R U R' F'" }, { name: "F5", alg: "y' r U R' U' r' F R F'" }, { name: "F6", alg: "R' U R2 D r' U2 r D' R2 U' R" }, { name: "G1", alg: "R U2 R2 U' R2 U' R2 U2 R" }, { name: "G2", alg: "R' F2 R U2 R U2 R' F2 U' R U' R'" }, { name: "G3", alg: "R' U' F' R U R' U' R' F R2 U2 R' U2 R" }, { name: "G4", alg: "R U R' U' R' F R2 U R' U' R U R' U' F'" }, { name: "G5", alg: "R U' L' U R' U L U L' U L" }, { name: "G6", alg: "R U D' R U R' D R2 U' R' U' R2 U2 R" }, { name: "H1", alg: "R U R' U R U' R' U R U2 R'" }, { name: "H2", alg: "F R U' R' U R U2 R' U' R U R' U' F'" }, { name: "H3", alg: "R U R' U R U L' U R' U' L" }, { name: "H4", alg: "y F R U R' U' R U R' U' R U R' U' F'" }]
+
+class RandomSelector {
+  constructor(length) {
+    this.length = length
+  }
+  select () {
+    return Math.floor(Math.random() * Math.floor(this.length))
+  }
+}
+
+class SequentialSelector { // eslint-disable-line
+  constructor(length) {
+    this.length = length
+    this.start = Math.floor(Math.random() * Math.floor(this.length))
+    this.curr = this.start
+  }
+  select () {
+    let ret = this.curr
+    this.curr = (this.curr + 1) % this.length
+    return ret
+  }
+}
+
 export default {
   name: "algtrainer",
   components: {
@@ -35,9 +60,10 @@ export default {
   },
   data: () => ({
     twistyPlayer: null, // TODO: display just the cube and not the entire player window
-    scramble: "R U2 R' U2 R' U' R U R U' R' U2 R' U2 R",
+    item: {name: "invalid", alg: ""},
     moves: [],
     puzzleState: null,
+    selector: null,
 
     timerID: null,
     startTime: null,
@@ -80,8 +106,8 @@ export default {
       this.timerID = null
     },
     selectNewAlg () {
-      this.scramble = "R U2 R' U2 R' U' R U R U' R' U2 R' U2 R"
-      let inverseAlg = invert(parse(this.scramble))
+      this.item = COLL_LIST[this.selector.select()]
+      let inverseAlg = invert(parse(this.item.alg))
       this.puzzleState.applyAlg(inverseAlg)
       inverseAlg.nestedUnits.forEach(v => {
         this.twistyPlayer.experimentalAddMove(v)
@@ -105,6 +131,7 @@ export default {
     asyncSetup(this.twistyPlayer)
     window.puzzle = null
     
+    this.selector = new RandomSelector(COLL_LIST.length)
     this.selectNewAlg()
   },
 }
