@@ -60,6 +60,7 @@ export default {
         let m = BareBlockMove(e.key.toUpperCase(), 1)
         this.moves.push(m)
         this.puzzleState.applyBlockMove(m)
+        // TODO: ensure that this function isn't too expensive so timing doesn't have latency.
         console.log("Cube is solved: ", EquivalentTransformations(Puzzles['3x3x3'], this.puzzleState.state, new KPuzzle(Puzzles['3x3x3']).state))
       }
     })

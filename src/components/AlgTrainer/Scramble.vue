@@ -7,6 +7,8 @@
 </template>
 
 <script>
+import { algToString, coalesceBaseMoves, parse, BareBlockMove, Sequence } from "cubing/alg"
+
 export default {
   name: "scramble",
   data: () => ({
@@ -17,35 +19,23 @@ export default {
     scramble: String,
   },
   watch: {
-    // TODO: figure out if there's a way to simplify all this using the cubing/alg library
     moves () {
-      let processed = []
-      let lastMove = '-'
-      this.moves.forEach((move) => {
-        if (lastMove === move.family) {
-          //debugger; // eslint-disable-line
-          processed[processed.length - 1].amount += move.amount
-          if (processed[processed.length - 1].amount === 3) processed[processed.length - 1].amount = -1
-          if (processed[processed.length - 1].amount === -2) processed[processed.length - 1].amount = 2
-        } else {
-          lastMove = move.family
-          processed.push(Object.assign({}, move))
-        }
-      })
-      // TODO: fix processedMoves to support canceling recursively (ie. F R' U U' R F => F2)
-      this.processedMoves = processed.filter(v => v.amount)
+      let processed = this.moves.slice()
+      let oldStr = algToString(new Sequence(processed))
+      while (true) { // eslint-disable-line
+        processed = coalesceBaseMoves(new Sequence(processed)).nestedUnits
+        processed = processed.map(v => (new BareBlockMove(v.family, v.amount % 4))).filter(v => v.amount)
+        let newStr = algToString(new Sequence(processed))
+        if (newStr === oldStr) break
+        else oldStr = newStr
+      }
+
+      this.processedMoves = processed
     }
   },
   computed: {
     processedScramble () {
-      return this.scramble.split(' ').map((v) => {
-        const matches = v.match(/^([RUFLDB])(.?)$/)
-        if (!matches) return {} // TODO: handle this error case
-        return {
-          family: matches[1],
-          amount: matches[2] === '2' ? 2 : (matches[2] === "'" ? -1 : matches[2] === "" ? 1 : 4),
-        }
-      })
+      return parse(this.scramble).nestedUnits
     },
     difference () {
       let i = 0, j = 0
