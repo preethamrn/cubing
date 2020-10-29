@@ -16,7 +16,7 @@ import {
 import { KPuzzle, Puzzles, EquivalentTransformations } from "cubing/kpuzzle"
 import { TwistyPlayer } from "cubing/twisty"
 import Scramble from "../components/AlgTrainer/Scramble"
-import { clearInterval, setInterval } from 'timers';
+import { clearInterval, setInterval, setTimeout } from 'timers';
 
 async function asyncSetup(twistyPlayer) {
   console.log("asyncSetup")
@@ -49,7 +49,6 @@ export default {
       window.puzzle = await connect({ acceptAllDevices })
       window.puzzle.addMoveListener((e) => {
         if (this.startTime === null) {
-          this.puzzleState.applyAlg(invert(parse(this.scramble)))
           this.startTimer()
         }
         this.twistyPlayer.experimentalAddMove(e.latestMove)
@@ -58,7 +57,11 @@ export default {
         // TODO: ensure that this function isn't too expensive so timing doesn't have latency.
         if (EquivalentTransformations(Puzzles['3x3x3'], this.puzzleState.state, new KPuzzle(Puzzles['3x3x3']).state)) {
           this.stopTimer()
-          this.moves = []
+          // TODO: add feature to remove this pause.
+          setTimeout(() => {
+            this.selectNewAlg()
+            this.moves = []
+          }, 1000)
         }
       })
       // window.puzzle.addOrientationListener(() => {
@@ -75,6 +78,14 @@ export default {
       clearInterval(this.timerID)
       this.startTime = null
       this.timerID = null
+    },
+    selectNewAlg () {
+      this.scramble = "R U2 R' U2 R' U' R U R U' R' U2 R' U2 R"
+      let inverseAlg = invert(parse(this.scramble))
+      this.puzzleState.applyAlg(inverseAlg)
+      inverseAlg.nestedUnits.forEach(v => {
+        this.twistyPlayer.experimentalAddMove(v)
+      })
     }
   },
   mounted () {
@@ -87,11 +98,14 @@ export default {
       }
     })
     this.puzzleState = new KPuzzle(Puzzles['3x3x3'])
+    
+    /// TODO: replace this code with barebones twisty cube (instead of full window)
     this.twistyPlayer = new TwistyPlayer({ alg: new Sequence([]) })
     document.querySelector('#twisty').appendChild(this.twistyPlayer)
-    
     asyncSetup(this.twistyPlayer)
     window.puzzle = null
+    
+    this.selectNewAlg()
   },
 }
 </script>
