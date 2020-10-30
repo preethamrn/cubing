@@ -64,6 +64,24 @@ export default {
     }
   },
   computed: {
+    // TODO:  instead of processing scrambles and moves separately and then computed difference, instead, do a one time pass where you go through the processedScramble move by move and then keep pulling from the moves list until each scramble move is fulfilled.
+    //        keep going until each move is either complete, partial, or incomplete. We can find out the movesToExec using the latest unprocessed move (since U U' won't be coalesced) and in special case where the move also completes a wide/rotation move, we do the rotation.
+    //        designate the special case using a field similar to length (eg. rotations) which are appended to the movesToExec. after processing the scramble append any final rotations to the first move.
+    //        Q: how do we handle partial rotation moves?
+    //        Q: how do we handle the case where (F U R R' U' F => F2?)... or do we ignore this case and just make all the extra moves "incorrect"
+    // ALTERNATIVELY: just use EquivalentTransformations to determine which states are equivalent and just push the algorithm up to that state. incorrect moves are fullCoalesced.
+    //                This makes it easier to determine the current progress in the scramble but also makes it very difficult to determine the movesToExec. It also has a time complexity of O(N*M).
+
+    // Final idea?
+    // We only process the scramble to get the orientation state, current move/rotation, and mapping for each move.
+    // State = scrambleState, scramblePos (ie, how far have we checked up to in the scramble)
+    // Use EquivalentTransformation for each cube move to see which step in the scramble it is equivalent to (if you skip steps, this could cause an issue). The scramble cube state will need to be rotated with the appropriate rotations (tracked by orientation state).
+    // Incorrect moves are any extra moves that don't match up. However, if we end up getting a state match, we reset the incorrect moves list.
+    // Partial moves are moves where the current inverse mapped move matches with the current scramble move.
+    // movesToExec are the inverseMapped cube moves along with any rotations performed at the step (assuming a new step is just completed).
+    // Limitations:
+    // 1. If user performs any incorrect wide moves/rotations this won't track that and instead will ask the user to perform the inverse single layer turn.
+    // 2. Skipping steps or going to a previous step won't work (because we only check EquivalentTransformation for the current step in the scramble).
     processedScramble () {
       let parsed = parse(this.scramble).nestedUnits.slice()
       let processed = []
