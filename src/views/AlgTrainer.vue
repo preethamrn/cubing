@@ -1,7 +1,7 @@
 <template>
   <div class="algtrainer">
     <button @click='connect'>Connect</button>
-    <scramble :scramble='item.alg' :moves='moves' />
+    <scramble :scramble='item.alg' :moves='moves' @execMoves='executeMoves' />
     <div id='twisty'></div>
     <div>{{elapsedTime}}</div>
     <div>{{item}}</div>
@@ -37,7 +37,7 @@ class RandomSelector {
   }
   select () {
     return 0;
-    // TODO: debugging fixme
+    // TODO: debugging fixme and remove the alg 0 (AA) from the list
     // return Math.floor(Math.random() * Math.floor(this.length))
   }
 }
@@ -107,13 +107,16 @@ export default {
       this.startTime = null
       this.timerID = null
     },
+    executeMoves (moves) {
+      this.puzzleState.applyAlg(new Sequence(moves))
+      moves.forEach(v => {
+        this.twistyPlayer.experimentalAddMove(v)
+      })
+    },
     selectNewAlg () {
       this.item = COLL_LIST[this.selector.select()]
       let inverseAlg = invert(parse(this.item.alg))
-      this.puzzleState.applyAlg(inverseAlg)
-      inverseAlg.nestedUnits.forEach(v => {
-        this.twistyPlayer.experimentalAddMove(v)
-      })
+      this.executeMoves(inverseAlg.nestedUnits)
     }
   },
   mounted () {

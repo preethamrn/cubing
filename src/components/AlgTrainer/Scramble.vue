@@ -4,6 +4,7 @@
     <span class="incorrect"> {{algToString(difference.incorrect)}} </span>
     <span class="partial"> {{algToString(difference.partial)}} </span>
     <span class="todo"> {{algToString(difference.todo)}} </span>
+    {{difference}}
   </div>
 </template>
 
@@ -17,6 +18,14 @@ function mergeMappings (currentMapping, newMapping) {
     else merged[k] = currentMapping[k]
   })
   return merged
+}
+
+function invertMapping (mapping) {
+  let inverse = {}
+  Object.keys(mapping).forEach((k) => {
+    inverse[mapping[k]] = k
+  })
+  return inverse
 }
 
 export default {
@@ -85,10 +94,10 @@ export default {
           else if (v.family === 'u') [opposite, r, amt] = ['D', 'y', 1]
           else if (v.family === 'd') [opposite, r, amt] = ['U', 'y', -1]
           mapRotation(new BareBlockMove(r, amt))
-          processed.push({move: new BareBlockMove(mapping[opposite], v.amount), length, mapping: Object.assign({}, mapping)})
+          processed.push({move: new BareBlockMove(mapping[opposite], v.amount), length, inverseMapping: invertMapping(mapping)})
           length = 1
         } else {
-          processed.push({move: new BareBlockMove(mapping[v.family], v.amount), length, mapping: Object.assign({}, mapping) })
+          processed.push({move: new BareBlockMove(mapping[v.family], v.amount), length, inverseMapping: invertMapping(mapping) })
           length = 1
         }
       })
@@ -100,27 +109,42 @@ export default {
         processed,
       }
     },
+    // TODO:
+    // test when alg starts with wide move or rotation
+    // test with partial moves
+    // test with incorrect moves
+    // test when two consecutive moves are of same family (eg. r L => L2 x)
     difference () {
       let i = 0, j1 = 0, j2 = 0
-      let partial = []
+      let partial = [], correct = []
+      let movesToExec = []
       while (i < this.processedMoves.length && i < this.processedScramble.processed.length) {
-        if (this.processedScramble.processed[i].family === this.processedScramble.processed[i].move.family) {
+        if (this.processedMoves[i].family === this.processedScramble.processed[i].move.family) {
           if (this.processedMoves[i].amount !== this.processedScramble.processed[i].move.amount) {
             partial = [this.processedScramble.parsed[j2]]
             i++
             break
+          } else {
+            movesToExec = this.processedScramble.parsed.slice(j2, j2 + this.processedScramble.processed[i].length)
+            correct.push(...movesToExec)
           }
         } else {
           j1 = i
           break
         }
-        i++
         j2 += this.processedScramble.processed[i].length
+        i++
         j1 = i
       }
-      let correct = this.processedMoves.slice(0, j2)
       let todo = this.processedScramble.parsed.slice(j2, this.processedScramble.parsed.length)
-      let incorrect = invert(new Sequence(this.processedMoves.slice(j1, this.processedMoves.length))).nestedUnits
+      let incorrect = invert(new Sequence(
+        this.processedMoves.slice(j1, this.processedMoves.length).map(v => {
+          movesToExec = [new BareBlockMove(this.processedScramble.processed[j1].inverseMapping[v.family], v.amount)]
+          return movesToExec[0]
+        })
+      )).nestedUnits
+      this.$emit('execMoves', movesToExec)
+      // if (this.processedScramble.parsed)
       return {
         correct,
         incorrect,
