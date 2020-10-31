@@ -1,10 +1,10 @@
 <template>
-  <div class="scramble">
+  <span class="scramble">
     <span class="correct"> {{algToString(difference.correct)}} </span>
     <span class="incorrect"> {{algToString(difference.incorrect)}} </span>
     <span class="partial"> {{algToString(difference.partial)}} </span>
     <span class="todo"> {{algToString(difference.todo)}} </span>
-  </div>
+  </span>
 </template>
 
 <script>
@@ -67,6 +67,8 @@ export default {
   props: {
     moves: Array,
     scramble: String,
+    name: String,
+    index: Number,
   },
   methods: {
     algToString (moves) {
@@ -228,14 +230,25 @@ export default {
 </script>
 
 <style scoped>
+span::before {
+  content: " ";
+}
+span::after {
+  content: " ";
+}
+.scramble {
+  width: 100%;
+  padding-top: 15px;
+}
+
 .correct {
-  background-color: rgba(0, 255, 0, 1);
+  color: rgba(0, 255, 0, 1);
 }
 .incorrect {
-  background-color: rgba(255, 0, 0, 1);
+  color: rgba(255, 0, 0, 1);
 }
 .partial {
-  background-color: rgba(255, 196, 0, 1);
+  color: rgba(255, 196, 0, 1);
 }
 .todo {
 }
