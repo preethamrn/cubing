@@ -4,7 +4,6 @@
     <span class="incorrect"> {{algToString(difference.incorrect)}} </span>
     <span class="partial"> {{algToString(difference.partial)}} </span>
     <span class="todo"> {{algToString(difference.todo)}} </span>
-    {{difference}}
   </div>
 </template>
 
@@ -114,7 +113,6 @@ export default {
         if (this.latestMove >= 0) {
           let move = this.moves[this.latestMove]
           actualMove = new BareBlockMove(this.processedScramble[j].mapping[move.family], move.amount)
-          console.log('processing: ', actualMove)
           this.puzzleState.applyBlockMove(actualMove)
           movesToExec.push(actualMove)
         }
@@ -223,7 +221,6 @@ export default {
       })
       
       processed.reverse()
-      console.log(processed)
       return processed
     },
   }
