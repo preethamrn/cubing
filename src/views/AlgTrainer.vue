@@ -72,26 +72,18 @@ export default {
     timerID: null,
     startTime: null,
     elapsedTime: null,
+    waitingNewAlg: true,
   }),
   methods: {
     async connect () {
       const acceptAllDevices = false
       window.puzzle = await connect({ acceptAllDevices })
       window.puzzle.addMoveListener((e) => {
-        if (this.startTime === null) {
+        if (this.startTime === null && !this.waitingNewAlg) {
           this.startTimer()
         }
         console.log('received: ', e.latestMove)
         this.moves.push(e.latestMove)
-        // TODO: ensure that this function isn't too expensive so timing doesn't have latency.
-        // TODO: fix below lines to trigger in executeMoves
-        if (EquivalentTransformations(Puzzles['3x3x3'], this.puzzleState.state, new KPuzzle(Puzzles['3x3x3']).state)) {
-          this.stopTimer() // TODO: ensure the timer is "stopped" at the moment the last move is made (keep track of that time) instead of the time that processing/computation is finished
-          // TODO: add feature to remove this pause.
-          setTimeout(() => {
-            this.selectNewAlg()
-          }, 1000)
-        }
       })
       // window.puzzle.addOrientationListener(() => {
       //   // TODO
@@ -127,8 +119,19 @@ export default {
       moves.forEach(v => {
         this.twistyPlayer.experimentalAddMove(v)
       })
+      // TODO: ensure that this function isn't too expensive so timing doesn't have latency.
+      if (EquivalentTransformations(Puzzles['3x3x3'], this.puzzleState.state, new KPuzzle(Puzzles['3x3x3']).state)) {
+        this.stopTimer() // TODO: ensure the timer is "stopped" at the moment the last move is made (keep track of that time) instead of the time that processing/computation is finished
+        this.waitingNewAlg = true
+        // TODO: add feature to remove this pause.
+        setTimeout(() => {
+          // Fix this so it doesn't select a new alg until cube is in solved state
+          this.selectNewAlg()
+        }, 1000)
+      }
     },
     selectNewAlg (i) {
+      this.waitingNewAlg = false
       if (i === undefined) {
         let index = this.selector.select()
         this.item = COLL_LIST[index]
