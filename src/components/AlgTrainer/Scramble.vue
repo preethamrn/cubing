@@ -183,13 +183,13 @@ export default {
       let mapRotation = (v) => {
         if (v.family === 'y' && v.amount === 1) mapping = mergeMappings(mapping, {R: 'B', L: 'F', F: 'R', B: 'L'})
         else if (v.family === 'y' && v.amount === -1) mapping = mergeMappings(mapping, {R: 'F', L: 'B', F: 'L', B: 'R'})
-        else if (v.family === 'y' && v.amount === 2) mapping = mergeMappings(mapping, {R: 'L', L: 'R', F: 'B', B: 'F'})
+        else if (v.family === 'y' && Math.abs(v.amount) === 2) mapping = mergeMappings(mapping, {R: 'L', L: 'R', F: 'B', B: 'F'})
         else if (v.family === 'x' && v.amount === 1) mapping = mergeMappings(mapping, {U: 'F', D: 'B', F: 'D', B: 'U'})
         else if (v.family === 'x' && v.amount === -1) mapping = mergeMappings(mapping, {U: 'B', D: 'F', F: 'U', B: 'D'})
-        else if (v.family === 'x' && v.amount === 2) mapping = mergeMappings(mapping, {U: 'D', D: 'U', F: 'B', B: 'F'})
+        else if (v.family === 'x' && Math.abs(v.amount) === 2) mapping = mergeMappings(mapping, {U: 'D', D: 'U', F: 'B', B: 'F'})
         else if (v.family === 'z' && v.amount === 1) mapping = mergeMappings(mapping, {U: 'L', D: 'R', R: 'U', L: 'D'})
         else if (v.family === 'z' && v.amount === -1) mapping = mergeMappings(mapping, {U: 'R', D: 'L', R: 'D', L: 'U'})
-        else if (v.family === 'z' && v.amount === 2) mapping = mergeMappings(mapping, {U: 'D', D: 'U', R: 'L', L: 'R'})
+        else if (v.family === 'z' && Math.abs(v.amount) === 2) mapping = mergeMappings(mapping, {U: 'D', D: 'U', R: 'L', L: 'R'})
       }
       parsed.reverse() // process sequence in reverse because future rotations impact the current moves to be performed.
       parsed.forEach(v => {

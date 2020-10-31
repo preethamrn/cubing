@@ -121,7 +121,7 @@ export default {
         this.twistyPlayer.experimentalAddMove(v)
       })
       // TODO: ensure that this function isn't too expensive so timing doesn't have latency.
-      // TODO: Set EquivalentTransformation to only care about the required pieces. Each alg set has a different completion condition (eg. COLL permutes corners, ZBLL fully solves, OLL only orients and doesn't care about permutation)
+      // TODO: Set EquivalentTransformation to only care about the required pieces. Each alg set has a different completion condition (eg. COLL permutes corners, ZBLL fully solves, OLL only orients and doesn't care about permutation, PLL doesn't care about final rotation)
       if (EquivalentTransformations(Puzzles['3x3x3'], this.puzzleState.state, new KPuzzle(Puzzles['3x3x3']).state)) {
         this.stopTimer() // TODO: ensure the timer is "stopped" at the moment the last move is made (keep track of that time) instead of the time that processing/computation is finished
         this.waitingNewAlg = true
@@ -146,7 +146,7 @@ export default {
     }
   },
   mounted () {
-    this.algSet = ALG_SETS['OLL_LIST']
+    this.algSet = ALG_SETS['PLL_LIST']
 
     // document.addEventListener('keydown', (e) => {
     //   if ('urfdlbURFDLB'.split('').includes(e.key)) {
