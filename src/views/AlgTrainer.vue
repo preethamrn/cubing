@@ -1,7 +1,7 @@
 <template>
   <div class="algtrainer">
     <button @click='connect'>Connect</button>
-    <scramble :scramble='item.alg' :moves='moves' @execMoves='executeMoves' />
+    <scramble :scramble='item.alg' :move='move' @execMoves='executeMoves' />
     <div id='twisty'></div>
     <div>{{elapsedTime}}</div>
     <div>{{item}}</div>
@@ -63,7 +63,7 @@ export default {
   data: () => ({
     twistyPlayer: null, // TODO: display just the cube and not the entire player window
     item: {name: "invalid", alg: ""},
-    moves: [],
+    move: null,
     puzzleState: null,
     selector: null,
 
@@ -80,7 +80,7 @@ export default {
           this.startTimer()
         }
         this.twistyPlayer.experimentalAddMove(e.latestMove)
-        this.moves.push(e.latestMove)
+        this.move = e.latestMove
         this.puzzleState.applyBlockMove(e.latestMove)
         // TODO: ensure that this function isn't too expensive so timing doesn't have latency.
         if (EquivalentTransformations(Puzzles['3x3x3'], this.puzzleState.state, new KPuzzle(Puzzles['3x3x3']).state)) {
@@ -88,7 +88,7 @@ export default {
           // TODO: add feature to remove this pause.
           setTimeout(() => {
             this.selectNewAlg()
-            this.moves = []
+            this.move = null
           }, 1000)
         }
       })
@@ -124,7 +124,7 @@ export default {
     document.addEventListener('keydown', (e) => {
       if ('urfdlbURFDLB'.split('').includes(e.key)) {
         let m = BareBlockMove(e.key.toUpperCase(), 1)
-        this.moves.push(m)
+        this.move = m
         this.puzzleState.applyBlockMove(m)
       }
     })
