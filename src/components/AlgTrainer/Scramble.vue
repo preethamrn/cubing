@@ -53,11 +53,12 @@ function fullCoalesceBaseMoves (moves) {
 export default {
   name: "scramble",
   data: () => ({
-    latestMove: 0, // we need to process multiple moves at a time since we can turn faster than we process moves
+    latestMove: -1, // we need to process multiple moves at a time since we can turn faster than we process moves
 
     // these indices store the values up to (and not including) which have been processed
     puzzleState: null,
     incorrectMoves: [],
+    partialMoves: [],
 
     scrambleIndex: 0,
     scrambleState: null,
@@ -75,9 +76,11 @@ export default {
     },
     reset () {
       // reset puzzle state
+      this.latestMove = -1
       this.puzzleState = new KPuzzle(Puzzles['3x3x3'])
       this.puzzleState.applyAlg(invert(parse(this.scramble)))
       this.incorrectMoves = []
+      this.partialMoves = []
 
       this.scrambleIndex = 0
       this.scrambleState = new KPuzzle(Puzzles['3x3x3'])
@@ -102,19 +105,21 @@ export default {
     // 1. If user performs any incorrect wide moves/rotations this won't track that and instead will ask the user to perform the inverse single layer turn.
     // 2. Skipping steps or going to a previous step won't work (because we only check EquivalentTransformation for the current step in the scramble).
     findDifference () {
-      let j = this.scrambleIndex, todoJ = null
+      let j = this.scrambleIndex
       let partial = [], correct = [], incorrect = [], todo = []
       let movesToExec = []
 
       while (this.latestMove < this.moves.length) {
-        let move = this.moves[this.latestMove]
-        let actualMove = new BareBlockMove(this.processedScramble[j].mapping[move.family], move.amount)
-        console.log('processing: ', actualMove)
-        this.puzzleState.applyBlockMove(actualMove)
-        movesToExec.push(actualMove)
+        let actualMove = null
+        if (this.latestMove >= 0) {
+          let move = this.moves[this.latestMove]
+          actualMove = new BareBlockMove(this.processedScramble[j].mapping[move.family], move.amount)
+          console.log('processing: ', actualMove)
+          this.puzzleState.applyBlockMove(actualMove)
+          movesToExec.push(actualMove)
+        }
         while (j < this.processedScramble.length) {
           let alg = {}
-          // TODO: instead of multiple cases for rotations vs no rotation, just have all the adjacent rotations in a single "move". This fixes the error when a correct move is marked incorrect (eg. y R, B => incorrect: B', todo: y R)
           if (!this.processedScramble[j].rotation) {
             alg = new Sequence([this.processedScramble[j].move])
           } else {
@@ -129,16 +134,16 @@ export default {
               movesToExec.push(this.processedScramble[j].rotation)
             }
             this.incorrectMoves = []
-            actualMove = null // the move has been consumed and we should stop processing it
+            this.partialMoves = []
             j++
+            actualMove = null // the move has been consumed and we should stop processing it
           } else {
             this.scrambleState.applyAlg(invert(alg))
             // we need to double check if actualMove hasn't already been consumed due to cases like (scramble: U2 y R B, moves: U2 R. the R would show up as an incomplete since we didn't break out of the loop after the equivalence)
             if (actualMove) {
               if (this.incorrectMoves.length == 0 && actualMove.family === this.processedScramble[j].move.family) {
-                // TODO: fix partial for case where there is an incorrect move but the next move is partially correct (eg. scramble: U2 R, moves: U F. We should show incorrect: F' + partial: U2)
-                partial = [this.processedScramble[j].move]
-                todoJ = j+1
+                // store partial for case where there is an incorrect move but the next move is partially correct (eg. scramble: U2 R, moves: U F. We should show incorrect: F' + partial: U2)
+                this.partialMoves = [this.processedScramble[j].move]
               } else {
                 this.incorrectMoves = fullCoalesceBaseMoves(this.incorrectMoves.concat(actualMove))
               }
@@ -149,8 +154,9 @@ export default {
         this.latestMove++
       }
       correct = this.processedScramble.map(v => v.move).slice(0, j)
-      todo = this.processedScramble.map(v => v.move).slice(todoJ || j, this.processedScramble.length)
       incorrect = invert(new Sequence(this.incorrectMoves)).nestedUnits
+      partial = this.partialMoves
+      todo = this.processedScramble.map(v => v.move).slice(j + partial.length, this.processedScramble.length)
       this.scrambleIndex = j
 
       this.$emit('execMoves', movesToExec)
@@ -165,14 +171,13 @@ export default {
   },
   watch: {
     moves () {
-      this.findDifference()
+      if (this.moves.length > 0) this.findDifference()
     },
     processedScramble () {
       this.reset()
     },
   },
   computed: {
-    // TODO: Update processed so that each "move" actually contains a single layer turn as well as all the preceeding rotations (and final move also contains any following rotations)
     processedScramble () {
       let parsed = parse(this.scramble).nestedUnits.slice()
       let processed = []
@@ -214,11 +219,6 @@ export default {
       console.log(processed)
       return processed
     },
-    // TODO:
-    // test when alg starts with wide move or rotation
-    // test with partial moves
-    // test with incorrect moves
-    // test when two consecutive moves are of same family (eg. r L => L2 x)
   }
 }
 </script>
