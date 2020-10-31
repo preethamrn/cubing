@@ -1,28 +1,28 @@
 <template>
   <div class="algtrainer">
     <v-row class='top-bar'>
-      <v-col offset='1'><scramble :scramble='item.alg' :name='item.name' :index='item.index' :moves='moves' @execMoves='executeMoves' ref='scramble' /></v-col>
-      <v-col cols='1'><button @click='reset'>Reset</button></v-col>
-      <v-col cols='1'><button @click='connect'>Connect</button></v-col>
+      <v-col offset='4'><scramble :scramble='item.alg' :name='item.name' :index='item.index' :moves='moves' @execMoves='executeMoves' ref='scramble' /></v-col>
+      <v-col cols='1'>
+        <button @click='reset'>Reset</button>
+        <button @click='connect'>Connect</button>
+      </v-col>
     </v-row>
-    <v-container>
-      <v-row>
-        <v-col><div id='twisty'></div></v-col>
-        <v-col>
-          <div>{{displayTime(elapsedTime)}}</div>
-          <div v-for='({time, item}, index) in timesList' :key='index'>
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on" style='display: inline-block;'>
-                  {{displayTime(time)}}
-                </div>
-              </template>
-              <b>{{item.name}}</b>: {{item.alg}}
-            </v-tooltip>
-          </div>
-        </v-col>
-      </v-row>    
-    </v-container>
+    <v-row>
+      <v-col><div id='twisty'></div></v-col>
+      <v-col cols='2'>
+        <div class='main-timer'>{{displayTime(elapsedTime)}}</div>
+        <div v-for='({time, item}, index) in timesList' :key='index'>
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <div v-on="on" style='display: inline-block;'>
+                {{displayTime(time)}}
+              </div>
+            </template>
+            <b>{{item.name}}</b>: {{item.alg}}
+          </v-tooltip>
+        </div>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -206,5 +206,11 @@ export default {
 .top-bar {
   font-size: 2em;
   background-color: rgba(93, 202, 93, 0.746);
+}
+.main-timer {
+  font-size: 5em;
+  justify-content: center;
+  text-align: center;
+  font-weight: 600;
 }
 </style>
