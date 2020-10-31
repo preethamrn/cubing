@@ -7,9 +7,9 @@
         <button @click='connect'>Connect</button>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row class='main-contents'>
       <v-col><div id='twisty'></div></v-col>
-      <v-col cols='2'>
+      <v-col cols='2' style='background-color: #eeeeee;'>
         <div class='main-timer'>{{displayTime(elapsedTime)}}</div>
         <div v-for='({time, item}, index) in timesList' :key='index'>
           <v-tooltip top>
@@ -200,12 +200,18 @@ export default {
 </script>
 
 <style scoped>
-.container {
-  margin: 0;
+.algtrainer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 .top-bar {
+  flex: 1;
   font-size: 2em;
   background-color: rgba(93, 202, 93, 0.746);
+}
+.main-contents {
+  flex: 20;
 }
 .main-timer {
   font-size: 5em;
