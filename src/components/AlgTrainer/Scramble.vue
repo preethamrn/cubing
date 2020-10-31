@@ -9,7 +9,9 @@
 </template>
 
 <script>
+/* eslint-disable */
 import { algToString, coalesceBaseMoves, invert, parse, BareBlockMove, Sequence } from "cubing/alg"
+import { KPuzzle, Puzzles, EquivalentTransformations } from "cubing/kpuzzle"
 
 function mergeMappings (currentMapping, newMapping) {
   let merged = {}
@@ -28,10 +30,35 @@ function invertMapping (mapping) {
   return inverse
 }
 
+function fullCoalesceBaseMoves (moves) {
+  let processed = moves.slice()
+  let oldStr = algToString(new Sequence(processed)), newStr = ''
+  while (true) { // eslint-disable-line
+    processed = coalesceBaseMoves(new Sequence(processed)).nestedUnits
+    processed = processed.map(v => {
+      let newAmount = v.amount % 4
+      if (newAmount === -2) newAmount = 2
+      if (newAmount === -3) newAmount = 1
+      if (newAmount === 3) newAmount = -1
+      return new BareBlockMove(v.family, newAmount)
+    }).filter(v => v.amount)
+    let newStr = algToString(new Sequence(processed))
+    if (oldStr === newStr) break
+    oldStr = newStr
+  }
+  return processed
+}
+
 export default {
   name: "scramble",
   data: () => ({
-    processedMoves: [],
+    // these indices store the values up to (and not including) which have been processed
+    lastMoveIndex: 0,
+    lastMoveState: null,
+    scrambleIndex: 0,
+    scrambleState: null,
+    incorrectStart: 0,
+    difference: {},
   }),
   props: {
     moves: Array,
@@ -39,40 +66,67 @@ export default {
   },
   methods: {
     algToString (moves) {
+      if (!moves) return ""
       return algToString(new Sequence(moves))
-    }
+    },
+    findDifference () {
+      let i = this.lastMoveIndex, j = this.scrambleIndex
+      let partial = [], correct = [], incorrect = [], todo = []
+      let movesToExec = []
+      while (i < this.moves.length && j < this.processedScramble.length) {
+        this.lastMoveState.applyBlockMove(this.moves[i])
+        while (j < this.processedScramble.length) {
+          let alg = new Sequence(('xyz'.includes(this.processedScramble[j].move.family) ? [] : [this.processedScramble[j].move]).concat(...this.processedScramble[j].rotations))
+          this.scrambleState.applyAlg(alg)
+          let equivalent = EquivalentTransformations(Puzzles['3x3x3'], this.lastMoveState.state, this.scrambleState.state)
+          this.scrambleState.applyAlg(invert(alg))
+          if (equivalent) {
+            this.scrambleState.applyBlockMove(this.processedScramble[j].move)
+            if ('xyzrludfb'.includes(this.processedScramble[j].move.family)) movesToExec.push(this.processedScramble[j].rotations[0])
+            this.incorrectStart = i+1
+            j++
+          } else {
+            break
+          }
+        }
+        i++
+      }
+      correct = this.processedScramble.map(v => v.move).slice(0, j)
+      incorrect = fullCoalesceBaseMoves(this.moves.slice(this.incorrectStart, i))
+      todo = this.processedScramble.map(v => v.move).slice(j, this.processedScramble.length)
+      movesToExec = movesToExec.concat(this.moves.slice(this.lastMoveIndex, i).map(v => (new BareBlockMove(this.processedScramble[j].inverseMapping[v.family], v.amount))))
+      this.lastMoveIndex = i
+      this.scrambleIndex = j
+
+      console.log(movesToExec)
+      this.$emit('execMoves', movesToExec)
+      
+      this.difference = {
+        correct,
+        incorrect,
+        todo,
+        partial,
+      }
+    },
   },
   watch: {
     moves () {
-      let processed = this.moves.slice()
-      let oldStr = algToString(new Sequence(processed))
-      while (true) { // eslint-disable-line
-        processed = coalesceBaseMoves(new Sequence(processed)).nestedUnits
-        processed = processed.map(v => {
-          let newAmount = v.amount % 4
-          if (newAmount === -2) newAmount = 2
-          if (newAmount === -3) newAmount = 1
-          if (newAmount === 3) newAmount = -1
-          return new BareBlockMove(v.family, newAmount)
-        }).filter(v => v.amount)
-        let newStr = algToString(new Sequence(processed))
-        if (newStr === oldStr) break
-        else oldStr = newStr
-      }
+      this.findDifference()
+    },
+    processedScramble () {
+      // reset puzzle state
+      this.lastMoveIndex = 0
+      this.lastMoveState = new KPuzzle(Puzzles['3x3x3'])
+      this.scrambleIndex = 0
+      this.scrambleState = new KPuzzle(Puzzles['3x3x3'])
+      this.scrambleState.applyAlg(invert(new Sequence(this.processedScramble[0].rotations)))
 
-      this.processedMoves = processed
-    }
+      // find initial "difference"
+      this.findDifference()
+    },
   },
   computed: {
-    // TODO:  instead of processing scrambles and moves separately and then computed difference, instead, do a one time pass where you go through the processedScramble move by move and then keep pulling from the moves list until each scramble move is fulfilled.
-    //        keep going until each move is either complete, partial, or incomplete. We can find out the movesToExec using the latest unprocessed move (since U U' won't be coalesced) and in special case where the move also completes a wide/rotation move, we do the rotation.
-    //        designate the special case using a field similar to length (eg. rotations) which are appended to the movesToExec. after processing the scramble append any final rotations to the first move.
-    //        Q: how do we handle partial rotation moves?
-    //        Q: how do we handle the case where (F U R R' U' F => F2?)... or do we ignore this case and just make all the extra moves "incorrect"
-    // ALTERNATIVELY: just use EquivalentTransformations to determine which states are equivalent and just push the algorithm up to that state. incorrect moves are fullCoalesced.
-    //                This makes it easier to determine the current progress in the scramble but also makes it very difficult to determine the movesToExec. It also has a time complexity of O(N*M).
-
-    // Final idea?
+    /// ALGORITHM FOR PROCESSING SCRAMBLE AND COMPUTING DIFFERENCE
     // We only process the scramble to get the orientation state, current move/rotation, and mapping for each move.
     // State = scrambleState, scramblePos (ie, how far have we checked up to in the scramble)
     // Use EquivalentTransformation for each cube move to see which step in the scramble it is equivalent to (if you skip steps, this could cause an issue). The scramble cube state will need to be rotated with the appropriate rotations (tracked by orientation state).
@@ -97,79 +151,40 @@ export default {
         else if (v.family === 'z' && v.amount === 1) mapping = mergeMappings(mapping, {U: 'R', D: 'L', R: 'B', L: 'F'})
         else if (v.family === 'z' && v.amount === 2) mapping = mergeMappings(mapping, {U: 'D', D: 'U', R: 'L', L: 'R'})
       }
-      let length = 1
+      let rotations = []
       parsed.reverse() // process sequence in reverse because future rotations impact the current moves to be performed.
       parsed.forEach(v => {
+        let rotationMove = null
         if ('xyz'.includes(v.family)) {
-          mapRotation(v)
-          length++
+          rotationMove = v
         } else if ('rlfbud'.includes(v.family)) {
-          let opposite = '-', r = '-', amt = 0
-          if (v.family === 'r') [opposite, r, amt] = ['L', 'x', 1]
-          else if (v.family === 'l') [opposite, r, amt] = ['R', 'x', -1]
-          else if (v.family === 'f') [opposite, r, amt] = ['B', 'z', 1]
-          else if (v.family === 'b') [opposite, r, amt] = ['F', 'z', -1]
-          else if (v.family === 'u') [opposite, r, amt] = ['D', 'y', 1]
-          else if (v.family === 'd') [opposite, r, amt] = ['U', 'y', -1]
-          mapRotation(new BareBlockMove(r, amt))
-          processed.push({move: new BareBlockMove(mapping[opposite], v.amount), length, inverseMapping: invertMapping(mapping)})
-          length = 1
-        } else {
-          processed.push({move: new BareBlockMove(mapping[v.family], v.amount), length, inverseMapping: invertMapping(mapping) })
-          length = 1
+          let [opposite, r, amt] = {
+            'r': ['L', 'x', 1],
+            'l': ['R', 'x', -1],
+            'f': ['B', 'z', 1],
+            'b': ['F', 'z', -1],
+            'u': ['D', 'y', 1],
+            'd': ['U', 'y', -1],
+          }[v.family]
+          v = new BareBlockMove(opposite, v.amount)
+          rotationMove = new BareBlockMove(r, amt * v.amount)
         }
+        if (rotationMove) {
+          mapRotation(rotationMove)
+          rotations = [rotationMove, ...rotations]
+        }
+        // TODO: do we still need mapping + invertMapping? (can we just revere all the mapping moves and use invert instead?)
+        processed.push({move: v, rotations, inverseMapping: invertMapping(mapping)})
       })
       
       processed.reverse()
-      parsed = parsed.reverse()
-      return {
-        parsed,
-        processed,
-      }
+      return processed
     },
     // TODO:
     // test when alg starts with wide move or rotation
     // test with partial moves
     // test with incorrect moves
     // test when two consecutive moves are of same family (eg. r L => L2 x)
-    difference () {
-      let i = 0, j1 = 0, j2 = 0
-      let partial = [], correct = []
-      let movesToExec = []
-      while (i < this.processedMoves.length && i < this.processedScramble.processed.length) {
-        if (this.processedMoves[i].family === this.processedScramble.processed[i].move.family) {
-          if (this.processedMoves[i].amount !== this.processedScramble.processed[i].move.amount) {
-            partial = [this.processedScramble.parsed[j2]]
-            i++
-            break
-          } else {
-            movesToExec = this.processedScramble.parsed.slice(j2, j2 + this.processedScramble.processed[i].length)
-            correct.push(...movesToExec)
-          }
-        } else {
-          j1 = i
-          break
-        }
-        j2 += this.processedScramble.processed[i].length
-        i++
-        j1 = i
-      }
-      let todo = this.processedScramble.parsed.slice(j2, this.processedScramble.parsed.length)
-      let incorrect = invert(new Sequence(
-        this.processedMoves.slice(j1, this.processedMoves.length).map(v => {
-          movesToExec = [new BareBlockMove(this.processedScramble.processed[j1].inverseMapping[v.family], v.amount)]
-          return movesToExec[0]
-        })
-      )).nestedUnits
-      this.$emit('execMoves', movesToExec)
-      // if (this.processedScramble.parsed)
-      return {
-        correct,
-        incorrect,
-        todo,
-        partial,
-      }
-    }
   }
 }
 </script>
