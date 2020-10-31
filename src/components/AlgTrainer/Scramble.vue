@@ -1,5 +1,6 @@
 <template>
   <span class="scramble">
+    <div class="name">{{name}}</div>
     <span class="correct"> {{algToString(difference.correct)}} </span>
     <span class="incorrect"> {{algToString(difference.incorrect)}} </span>
     <span class="partial"> {{algToString(difference.partial)}} </span>
@@ -241,6 +242,11 @@ span::after {
   padding-top: 15px;
 }
 
+.name {
+  display: inline-block;
+  font-weight: 600;
+  padding-right: 40px;
+}
 .correct {
   color: rgba(0, 255, 0, 1);
 }

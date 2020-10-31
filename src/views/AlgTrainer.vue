@@ -10,7 +10,16 @@
         <v-col><div id='twisty'></div></v-col>
         <v-col>
           <div>{{displayTime(elapsedTime)}}</div>
-          <div v-for='({time, item}, index) in timesList' :key='index'>{{displayTime(time)}}</div>
+          <div v-for='({time, item}, index) in timesList' :key='index'>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on" style='display: inline-block;'>
+                  {{displayTime(time)}}
+                </div>
+              </template>
+              <b>{{item.name}}</b>: {{item.alg}}
+            </v-tooltip>
+          </div>
         </v-col>
       </v-row>    
     </v-container>
