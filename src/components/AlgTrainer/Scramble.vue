@@ -51,6 +51,8 @@ function fullCoalesceBaseMoves (moves) {
 export default {
   name: "scramble",
   data: () => ({
+    moveQueue: [], // use a move queue so that we can turn faster than we process moves
+
     // these indices store the values up to (and not including) which have been processed
     puzzleState: null,
     incorrectMoves: [],
@@ -62,12 +64,30 @@ export default {
   }),
   props: {
     move: Object,
+    id: Number,
     scramble: String,
   },
   methods: {
     algToString (moves) {
       if (!moves) return ""
       return algToString(new Sequence(moves))
+    },
+    reset () {
+      // reset puzzle state
+      this.puzzleState = new KPuzzle(Puzzles['3x3x3'])
+      this.puzzleState.applyAlg(invert(parse(this.scramble)))
+      this.incorrectMoves = []
+
+      this.scrambleIndex = 0
+      this.scrambleState = new KPuzzle(Puzzles['3x3x3'])
+      this.scrambleState.applyAlg(invert(parse(this.scramble)))
+      
+      this.difference = {
+        correct: [],
+        incorrect: [],
+        partial: [],
+        todo: parse(this.scramble).nestedUnits,
+      }
     },
     /// ALGORITHM FOR PROCESSING SCRAMBLE AND COMPUTING DIFFERENCE
     // We only process the scramble to get the orientation state, current move/rotation, and mapping for each move.
@@ -80,12 +100,13 @@ export default {
     // Limitations:
     // 1. If user performs any incorrect wide moves/rotations this won't track that and instead will ask the user to perform the inverse single layer turn.
     // 2. Skipping steps or going to a previous step won't work (because we only check EquivalentTransformation for the current step in the scramble).
-    findDifference () {
+    findDifference (move) {
       let j = this.scrambleIndex, todoJ = null
       let partial = [], correct = [], incorrect = [], todo = []
       let movesToExec = []
 
-      let actualMove = new BareBlockMove(this.processedScramble[j].inverseMapping[this.move.family], this.move.amount)
+      let actualMove = new BareBlockMove(this.processedScramble[j].inverseMapping[move.family], move.amount)
+      console.log('processing: ', actualMove)
       this.puzzleState.applyBlockMove(actualMove)
       movesToExec.push(actualMove)
       while (j < this.processedScramble.length) {
@@ -97,7 +118,6 @@ export default {
         }
         this.scrambleState.applyAlg(alg)
         let equivalent = EquivalentTransformations(Puzzles['3x3x3'], this.puzzleState.state, this.scrambleState.state)
-        console.log(this.puzzleState.serialize(), this.scrambleState.serialize())
         if (equivalent) {
           if (this.processedScramble[j].rotation) {
             this.scrambleState.applyBlockMove(this.processedScramble[j].rotation)
@@ -111,7 +131,8 @@ export default {
           this.scrambleState.applyAlg(invert(alg))
           // we need to double check if actualMove hasn't already been consumed due to cases like (scramble: U2 y R B, moves: U2 R. the R would show up as an incomplete since we didn't break out of the loop after the equivalence)
           if (actualMove) {
-            if (actualMove.family === this.processedScramble[j].move.family) {
+            if (this.incorrectMoves.length == 0 && actualMove.family === this.processedScramble[j].move.family) {
+              // TODO: fix partial for case where there is an incorrect move but the next move is partially correct (eg. scramble: U2 R, moves: U F. We should show incorrect: F' + partial: U2)
               partial = [this.processedScramble[j].move]
               todoJ = j+1
             } else {
@@ -126,7 +147,6 @@ export default {
       incorrect = invert(new Sequence(this.incorrectMoves)).nestedUnits
       this.scrambleIndex = j
 
-      console.log(movesToExec)
       this.$emit('execMoves', movesToExec)
       
       this.difference = {
@@ -139,24 +159,16 @@ export default {
   },
   watch: {
     move () {
-     this.findDifference()
+      if (this.move) this.moveQueue.push(this.move.move)
+    },
+    moveQueue () {
+      if (this.moveQueue.length > 0) {
+        this.findDifference(this.moveQueue[0])
+        this.moveQueue = this.moveQueue.slice(1, this.moveQueue.length) // TODO: ensure no race conditions with move() watcher
+      }
     },
     processedScramble () {
-      // reset puzzle state
-      this.puzzleState = new KPuzzle(Puzzles['3x3x3'])
-      this.puzzleState.applyAlg(invert(parse(this.scramble)))
-      this.incorrectMoves = []
-
-      this.scrambleIndex = 0
-      this.scrambleState = new KPuzzle(Puzzles['3x3x3'])
-      this.scrambleState.applyAlg(invert(parse(this.scramble)))
-
-      this.difference = {
-        correct: [],
-        incorrect: [],
-        partial: [],
-        todo: parse(this.scramble).nestedUnits,
-      }
+      this.reset()
     },
   },
   computed: {
