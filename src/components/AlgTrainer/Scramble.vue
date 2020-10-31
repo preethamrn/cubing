@@ -209,10 +209,9 @@ export default {
           }[v.family]
           rotation = new BareBlockMove(r, amt * v.amount)
         } else if ('MES'.includes(v.family)) {
-          // TODO: fix slice moves (similar to how wide/rotation moves were fixed)
           let [r, amt] = {
-            'M': ['x', 1],
-            'E': ['y', 1],
+            'M': ['x', -1],
+            'E': ['y', -1],
             'S': ['z', 1],
           }[v.family]
           rotation = new BareBlockMove(r, amt * v.amount)
