@@ -8,7 +8,7 @@
       </v-col>
     </v-row>
     <v-row class='main-contents'>
-      <v-col><div id='twisty'></div></v-col>
+      <v-col style='padding: 0'><div id='twisty'></div></v-col>
       <v-col cols='2' style='background-color: #eeeeee;'>
         <div class='main-timer'>{{displayTime(elapsedTime)}}</div>
         <div v-for='({time, item}, index) in timesList' :key='index'>
@@ -114,7 +114,8 @@ export default {
 
       /// TODO: replace this code with barebones twisty cube (instead of full window)
       let oldTwisty = document.querySelector('#twisty').children[0]
-      this.twistyPlayer = new TwistyPlayer({ alg: new Sequence([]) })
+      this.twistyPlayer = new TwistyPlayer({ alg: new Sequence([]), background: "none", controls: "none" })
+      this.twistyPlayer.style = 'width: 100%; height: 100%'
       if (oldTwisty) document.querySelector('#twisty').replaceChild(this.twistyPlayer, oldTwisty)
       else document.querySelector('#twisty').appendChild(this.twistyPlayer)
 
@@ -212,6 +213,9 @@ export default {
 }
 .main-contents {
   flex: 20;
+}
+#twisty {
+  height: 100%;
 }
 .main-timer {
   font-size: 5em;
