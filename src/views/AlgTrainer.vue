@@ -33,16 +33,18 @@
       <v-col style='padding: 0'><div id='twisty'></div></v-col>
       <v-col cols='2' style='background-color: #eeeeee;'>
         <div class='main-timer'>{{displayTime(elapsedTime)}}</div>
-        <!-- TODO: Fix time list display to be scrolling list instead of filling up the screen (because we need the twisty height to be capped at screen height) -->
-        <div v-for='({time, item}, index) in timesList' :key='index'>
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <div v-on="on" style='display: inline-block;'>
-                {{displayTime(time)}}
-              </div>
-            </template>
-            <b>{{item.name}}</b>: {{item.alg}}
-          </v-tooltip>
+        <div class='times-list'>
+          <!-- TODO: add more stats in the times list -->
+          <div v-for='({time, item}, index) in timesList' :key='index'>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on" style='display: inline-block;'>
+                  {{displayTime(time)}}
+                </div>
+              </template>
+              <b>{{item.name}}</b>: {{item.alg}}
+            </v-tooltip>
+          </div>
         </div>
       </v-col>
     </v-row>
@@ -172,8 +174,7 @@ export default {
       /// TODO: replace this code with barebones twisty cube (instead of full window)
       let oldTwisty = document.querySelector('#twisty').children[0]
       this.twistyPlayer = new TwistyPlayer({ alg: new Sequence([]), background: "none", controls: "none" })
-      // this.twistyPlayer.style = 'width: 100%; height: 100%'
-      this.twistyPlayer.style = 'width: 500px; height: 500px'
+      this.twistyPlayer.style = 'width: 100%; height: 100%'
       if (oldTwisty) document.querySelector('#twisty').replaceChild(this.twistyPlayer, oldTwisty)
       else document.querySelector('#twisty').appendChild(this.twistyPlayer)
 
@@ -312,5 +313,9 @@ export default {
   justify-content: center;
   text-align: center;
   font-weight: 600;
+}
+.times-list {
+  max-height: 75vh;
+  overflow-y: scroll;
 }
 </style>
