@@ -17,11 +17,13 @@
               <v-select v-model="settingsSelector" :items="[{'name': 'Randomly', 'type': 'random'}, {'name': 'Sequentially', 'type': 'sequential'}]" item-text='name' item-value='type' />
               <b>What alg set would you like to train?</b>
               <v-select v-model="settingsAlgSet" :items='Object.keys(ALG_SETS)' />
+              <b>What timer would you like to use?</b>
+              <v-select v-model="settingsTimer" :items="[{'name': 'Browser time', 'type': 'browser'}, {'name': 'Inbuilt cube timestamps', 'type': 'cube'}]" item-text='name' item-value='type' />
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="primary" text @click="settingsModal = false; settings = {algSet: settingsAlgSet, selector: settingsSelector};">Save</v-btn>
+              <v-btn color="primary" text @click="settingsModal = false; settings = {algSet: settingsAlgSet, selector: settingsSelector, timer: settingsTimer};">Save</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -78,6 +80,7 @@ function getFromLocalStorage(name, defaultValue) {
     value = defaultValue
   } else {
     value = JSON.parse(value)
+    value = Object.assign(defaultValue, value)
   }
   return value
 }
@@ -118,7 +121,6 @@ class SequentialSelector {
   }
 }
 // TODO: fix bug with executeMoves when the cube should be solved but the last move is incorrect (this will probably require a fix in Scramble to support incorrect moves even after processedScramble is exhausted)
-// TODO: support both timing methods (internal cube timeStamp vs browser timer)
 // TODO: custom orientation
 
 // TODO: sessions
@@ -135,6 +137,7 @@ export default {
     settings: {},
     settingsAlgSet: '',
     settingsSelector: '',
+    settingsTimer: '',
 
     twistyPlayer: null, // TODO: display just the cube and not the entire player window
     item: {name: "invalid", alg: ""},
@@ -195,7 +198,7 @@ export default {
     },
     stopTimer (e) {
       clearInterval(this.timerID)
-      this.elapsedTime = (e.timeStamp - this.cubeStartTime)
+      if (this.settings.timer === 'cube' && e.timeStamp && this.cubeStartTime) this.elapsedTime = (e.timeStamp - this.cubeStartTime)
       this.timesList.unshift({time: this.elapsedTime, item: this.item})
       this.startTime = null
       this.timerID = null
@@ -274,9 +277,10 @@ export default {
     this.ALG_SETS = ALG_SETS
     this.timesList = getFromLocalStorage('timesList', []) // TODO: add more granularity to support session names
 
-    this.settings = getFromLocalStorage('algTrainerSettings', {algSet: "PLL", selector: "random"})
+    this.settings = getFromLocalStorage('algTrainerSettings', {algSet: "PLL", selector: "random", timer: "browser"})
     this.settingsAlgSet = this.settings.algSet
     this.settingsSelector = this.settings.selector
+    this.settingsTimer = this.settings.timer
   },
   mounted () {
     // document.addEventListener('keydown', (e) => {

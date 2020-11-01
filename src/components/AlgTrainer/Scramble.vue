@@ -134,7 +134,8 @@ export default {
             if (this.processedScramble[j].rotation) {
               this.scrambleState.applyBlockMove(this.processedScramble[j].rotation)
               this.puzzleState.applyBlockMove(this.processedScramble[j].rotation)
-              movesToExec.push({latestMove: this.processedScramble[j].rotation, timeStamp: this.moves[this.latestMove].timeStamp})
+              // TODO: remove the hack for Math.max(this.latestMove, 0) which is required to fix case where lastestMove == -1 but we're executing a move since it's a rotation.
+              movesToExec.push({latestMove: this.processedScramble[j].rotation, timeStamp: this.moves[Math.max(this.latestMove, 0)].timeStamp})
             }
             this.incorrectMoves = []
             this.partialMoves = []
