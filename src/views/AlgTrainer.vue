@@ -209,7 +209,8 @@ export default {
 .top-bar {
   flex: 1;
   font-size: 2em;
-  background-color: rgba(93, 202, 93, 0.746);
+  background-color: rgb(39, 39, 39);
+  color: white;
 }
 .main-contents {
   flex: 20;

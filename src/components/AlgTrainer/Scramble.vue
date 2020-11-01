@@ -257,5 +257,6 @@ span::after {
   color: rgba(255, 196, 0, 1);
 }
 .todo {
+  color: rgb(245, 245, 245);
 }
 </style>
