@@ -117,9 +117,11 @@ class SequentialSelector {
     return { pos: this.curr - this.start - 1, total: this.length } // Offset curr by 1 because it is auto-incremented
   }
 }
-// TODO: sessions
-
+// TODO: fix bug with executeMoves when the cube should be solved but the last move is incorrect (this will probably require a fix in Scramble to support incorrect moves even after processedScramble is exhausted)
+// TODO: support both timing methods (internal cube timeStamp vs browser timer)
 // TODO: custom orientation
+
+// TODO: sessions
 // TODO: support rotation/orientation agnostic EquivalentTransformations for solved states
 // TODO: support custom algs
 
@@ -141,7 +143,7 @@ export default {
     selector: null,
 
     timerID: null,
-    startTime: null,
+    startTime: null, cubeStartTime: null,
     elapsedTime: null,
     waitingNewAlg: true,
     onMoveCallback: null,
@@ -155,15 +157,16 @@ export default {
       const acceptAllDevices = false
       window.puzzle = await connect({ acceptAllDevices })
       window.puzzle.addMoveListener((e) => {
+        // console.log('receiving: ', e.latestMove)
         if (this.waitingNewAlg) {
-          this.executeMoves([e.latestMove]) // Always keep puzzle state equivalent to cube state
+          this.executeMoves([e]) // Always keep puzzle state equivalent to cube state
           if (this.onMoveCallback) this.onMoveCallback() // TODO: also add a message stating that the cube is unsolved and must be fixed to proceed
           return
         }
         if (this.startTime === null) {
-          this.startTimer()
+          this.startTimer(e)
         }
-        this.moves.push(e.latestMove)
+        this.moves.push(e)
       })
     },
     reset () {
@@ -171,7 +174,7 @@ export default {
 
       this.puzzleState = new KPuzzle(Puzzles['3x3x3'])
 
-      /// TODO: replace this code with barebones twisty cube (instead of full window)
+      // Set up twisty player
       let oldTwisty = document.querySelector('#twisty').children[0]
       this.twistyPlayer = new TwistyPlayer({ alg: new Sequence([]), background: "none", controls: "none" })
       this.twistyPlayer.style = 'width: 100%; height: 100%'
@@ -183,21 +186,25 @@ export default {
 
       this.selectNewAlg(this.item.index)
     },
-    startTimer () {
+    startTimer (e) {
       this.startTime = performance.now()
+      this.cubeStartTime = e.timeStamp
       this.timerID = setInterval(() => {
         this.elapsedTime = performance.now() - this.startTime
       }, 10)
     },
-    stopTimer () {
+    stopTimer (e) {
       clearInterval(this.timerID)
+      this.elapsedTime = (e.timeStamp - this.cubeStartTime)
       this.timesList.unshift({time: this.elapsedTime, item: this.item})
       this.startTime = null
       this.timerID = null
     },
     executeMoves (moves) {
-      this.puzzleState.applyAlg(new Sequence(moves))
-      moves.forEach(v => {
+      // TODO: (IMPORTANT NOTE) this function will fail if somehow we pass in 2 correct moves and 1 incorrect move to the Scramble component. The incorrect move fails to get a mapping and then the function returns an error and everything breaks.
+      let blockMoves = moves.map(v => v.latestMove)
+      this.puzzleState.applyAlg(new Sequence(blockMoves))
+      blockMoves.forEach(v => {
         this.twistyPlayer.experimentalAddMove(v)
       })
       // TODO: Set EquivalentTransformation to only care about the required pieces. Each alg set has a different completion condition (eg. COLL permutes corners, ZBLL fully solves, OLL only orients and doesn't care about permutation, PLL doesn't care about final rotation)
@@ -205,7 +212,7 @@ export default {
         if (this.waitingNewAlg) {
           this.selectNewAlg()
         } else {
-          this.stopTimer() // TODO: ensure the timer is "stopped" at the moment the last move is made (keep track of that time) instead of the time that processing/computation is finished
+          this.stopTimer(moves[moves.length - 1]) // Ensure the timer is "stopped" at the moment the last move is made (keep track of that time) instead of the time that processing/computation is finished
           this.waitingNewAlg = true
           // TODO: add feature to remove this pause.
           setTimeout(() => {
@@ -227,7 +234,7 @@ export default {
       }
       this.$refs.scramble.reset()
       let inverseAlg = invert(parse(this.item.alg))
-      this.executeMoves(inverseAlg.nestedUnits)
+      this.executeMoves(inverseAlg.nestedUnits.map(v => ({latestMove: v})))
       this.moves = []
     },
     // Converts from milliseconds time => mm:ss.SSS
@@ -275,7 +282,7 @@ export default {
     // document.addEventListener('keydown', (e) => {
     //   if ('urfdlbURFDLB'.split('').includes(e.key)) {
     //     let m = BareBlockMove(e.key.toUpperCase(), 1)
-    //     this.moves.push(m)
+    //     this.moves.push({latestMove: m})
     //     this.puzzleState.applyBlockMove(m)
     //   }
     // })

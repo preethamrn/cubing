@@ -114,10 +114,12 @@ export default {
       while (this.latestMove < this.moves.length) {
         let actualMove = null
         if (this.latestMove >= 0) {
-          let move = this.moves[this.latestMove]
+          let move = this.moves[this.latestMove].latestMove
+          // console.log('processing: ', move)
           actualMove = new BareBlockMove(this.processedScramble[j].mapping[move.family], move.amount)
           this.puzzleState.applyBlockMove(actualMove)
-          movesToExec.push(actualMove)
+          // We push the entire move event object into movesToExec because we need to keep track of when this move was performed so we get an accurate end time.
+          movesToExec.push({latestMove: actualMove, timeStamp: this.moves[this.latestMove].timeStamp})
         }
         while (j < this.processedScramble.length) {
           let alg = {}
@@ -132,7 +134,7 @@ export default {
             if (this.processedScramble[j].rotation) {
               this.scrambleState.applyBlockMove(this.processedScramble[j].rotation)
               this.puzzleState.applyBlockMove(this.processedScramble[j].rotation)
-              movesToExec.push(this.processedScramble[j].rotation)
+              movesToExec.push({latestMove: this.processedScramble[j].rotation, timeStamp: this.moves[this.latestMove].timeStamp})
             }
             this.incorrectMoves = []
             this.partialMoves = []
