@@ -1,7 +1,7 @@
 <template>
   <div class="algtrainer">
     <v-row class='top-bar'>
-      <v-col cols='1' style='padding-left: 50px'>{{(x = selector && selector.progress()) ? `${x.pos + 1}/${x.total} ${x.done ? 'DONE' : ''}` : ''}}</v-col>
+      <v-col cols='1' style='padding-left: 50px'>{{(x = selector && selector.progress()) ? `${x.pos + 1}/${x.total} ${x.pos >= x.total ? 'DONE' : ''}` : ''}}</v-col>
       <v-col offset='3'><scramble :scramble='item.alg' :name='item.name' :index='item.index' :moves='moves' @execMoves='executeMoves' ref='scramble' /></v-col>
       <v-col cols='1' class='controls'>
         <v-dialog v-model='settingsModal' width="500" >
@@ -101,22 +101,18 @@ class RandomSelector {
 }
 
 class SequentialSelector { 
-  constructor(length, start, curr, done) {
+  constructor(length, start, curr) {
     this.length = length
     this.start = start || Math.floor(Math.random() * Math.floor(this.length))
-    // TODO: improve curr so that you never modulo it until you're returning (that way we don't have to keep track of done, we don't need to have multiple conditions for curr and select)
-    this.curr = curr ? ((curr - 1 + this.length) % this.length) : this.start // When curr is already set, we need to go back one alg because curr is auto-incremented in select() so on page refresh we will actually be one alg ahead even if we didn't actually do the alg.
-    this.done = done || false
+    this.curr = curr ? curr - 1 : this.start // When curr is already set, we need to go back one alg because curr is auto-incremented in select() so on page refresh we will actually be one alg ahead even if we didn't actually do the alg.
   }
   select () {
-    let ret = this.curr
-    this.curr = (this.curr + 1) % this.length
-    if (this.curr === this.start) this.done = true
+    let ret = this.curr % this.length
+    this.curr++
     return ret
   }
   progress () {
-    if (this.done) return { pos: this.length - 1, total: this.length, done: true }
-    return { pos: ((this.curr + this.length) - this.start) % this.length - 1, total: this.length } // Offset curr by 1 because it is auto-incremented
+    return { pos: this.curr - this.start - 1, total: this.length } // Offset curr by 1 because it is auto-incremented
   }
 }
 // TODO: sessions
@@ -254,7 +250,7 @@ export default {
           let sequentialSelectorState = localStorage.getItem('sequentialSelectorState')
           if (sequentialSelectorState) {
             let v = JSON.parse(sequentialSelectorState)
-            this.selector = new SequentialSelector(v.length, v.start, v.curr, v.done)
+            this.selector = new SequentialSelector(v.length, v.start, v.curr)
             localStorage.removeItem('sequentialSelectorState')
           } else {
             this.selector = new SequentialSelector(this.algSet.length)
