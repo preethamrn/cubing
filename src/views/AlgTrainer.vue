@@ -19,11 +19,15 @@
               <v-select v-model="settingsAlgSet" :items='Object.keys(ALG_SETS)' />
               <b>What timer would you like to use?</b>
               <v-select v-model="settingsTimer" :items="[{'name': 'Browser time', 'type': 'browser'}, {'name': 'Inbuilt cube timestamps', 'type': 'cube'}]" item-text='name' item-value='type' />
+              <b>How long should the the trainer wait between solves (set to 0 for no pause)?</b>
+              <!-- TODO: support infinite wait time (trigger next solve manually) -->
+              <v-slider v-model="settingsWaitTime" color="orange" label="Time (ms)" min="0" max="3000" step="50" thumb-label></v-slider>
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="primary" text @click="settingsModal = false; settings = {algSet: settingsAlgSet, selector: settingsSelector, timer: settingsTimer};">Save</v-btn>
+              <!-- TODO: changing certain settings (eg. waitTime) shouldn't reset the alg set -->
+              <v-btn color="primary" text @click="settingsModal = false; settings = {algSet: settingsAlgSet, selector: settingsSelector, timer: settingsTimer, waitTime: settingsWaitTime};">Save</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -88,7 +92,7 @@ function getFromLocalStorage(name, defaultValue) {
 const ALG_SETS = {
   COLL: [{ name: "B1", alg: "R' U' R U' R' U2 R" }, { name: "B2", alg: "y R' U' R U' R' U R' D' R U R' D R2" }, { name: "B3", alg: "L R' U' R U L' U2 R' U2 R" }, { name: "B4", alg: "R' U' R U R' F R U R' U' R' F' R2" }, { name: "B5", alg: "R' U L U' R U L'" }, { name: "B6", alg: "R U' R' U2 R U' R' U2 R' D' R U R' D R" }, { name: "C1", alg: "R U R' U R U2 R'" }, { name: "C2", alg: "L' U2 L U2 R U' L' U L R'" }, { name: "C3", alg: "L' R U R' U' L U2 R U2 R'" }, { name: "C4", alg: "y' R U R' U R U' R D R' U' R D' R2" }, { name: "C5", alg: "R U' L' U R' U' L" }, { name: "C6", alg: "F' R U2 R' U2 R' F2 R U R U' R' F'" }, { name: "D1", alg: "y' R U2 R' U' R U R' U' R U R' U' R U' R'" }, { name: "D2", alg: "R' U2 R' D' R U2 R' D R2" }, { name: "D3", alg: "y R U2 R D R' U2 R D' R2" }, { name: "D4", alg: "x' R U' R' D R U R' D' x" }, { name: "D5", alg: "y2 F' r U R' U' r' F R" }, { name: "D6", alg: "y' R' U' R U R' F' R U R' U' R' F R2" }, { name: "E1", alg: "R' U' R U' R' U2 R2 U R' U R U2 R'" }, { name: "E2", alg: "R' F R U' R' U' R U R' F' R U R' U' R' F R F' R" }, { name: "E3", alg: "y2 R2 D R' U2 R D' R' U2 R'" }, { name: "E4", alg: "F R U' R' U R U R' U R U' R' F'" }, { name: "E5", alg: "R2 D' R U2 R' D R U2 R" }, { name: "E6", alg: "R' U2 R F U' R' U' R U F'" }, { name: "F1", alg: "R U2 R' U' R U' R2 U2 R U R' U R" }, { name: "F2", alg: "R' U R U2 R' L' U R U' L" }, { name: "F3", alg: "y l' U' L U R U' r' F" }, { name: "F4", alg: "y2 F R U R' U' R U' R' U' R U R' F'" }, { name: "F5", alg: "y' r U R' U' r' F R F'" }, { name: "F6", alg: "R' U R2 D r' U2 r D' R2 U' R" }, { name: "G1", alg: "R U2 R2 U' R2 U' R2 U2 R" }, { name: "G2", alg: "R' F2 R U2 R U2 R' F2 U' R U' R'" }, { name: "G3", alg: "R' U' F' R U R' U' R' F R2 U2 R' U2 R" }, { name: "G4", alg: "R U R' U' R' F R2 U R' U' R U R' U' F'" }, { name: "G5", alg: "R U' L' U R' U L U L' U L" }, { name: "G6", alg: "R U D' R U R' D R2 U' R' U' R2 U2 R" }, { name: "H1", alg: "R U R' U R U' R' U R U2 R'" }, { name: "H2", alg: "F R U' R' U R U2 R' U' R U R' U' F'" }, { name: "H3", alg: "R U R' U R U L' U R' U' L" }, { name: "H4", alg: "y F R U R' U' R U R' U' R U R' U' F'" }],
   OLL: [{ name: "OLL 1", alg: "R U2 R2 F R F' U2 R' F R F'" }, { name: "OLL 2", alg: "F R U R' U' F' f R U R' U' f'" }, { name: "OLL 3", alg: "y' f R U R' U' f' U' F R U R' U' F'" }, { name: "OLL 4", alg: "y' f R U R' U' f' U F R U R' U' F'" }, { name: "OLL 5", alg: "r' U2 R U R' U r" }, { name: "OLL 6", alg: "r U2 R' U' R U' r'" }, { name: "OLL 7", alg: "r U R' U R U2 r'" }, { name: "OLL 8", alg: "y2 r' U' R U' R' U2 r" }, { name: "OLL 9", alg: "y R U R' U' R' F R2 U R' U' F'" }, { name: "OLL 10", alg: "R U R' U R' F R F' R U2 R'" }, { name: "OLL 11", alg: "r' R2 U R' U R U2 R' U M'" }, { name: "OLL 12", alg: "F R U R' U' F' U F R U R' U' F'" }, { name: "OLL 13", alg: "r U' r' U' r U r' F' U F" }, { name: "OLL 14", alg: "R' F R U R' F' R F U' F'" }, { name: "OLL 15", alg: "r' U' r R' U' R U r' U r" }, { name: "OLL 16", alg: "r U r' R U R' U' r U' r'" }, { name: "OLL 17", alg: "R U R' U R' F R F' U2 R' F R F'" }, { name: "OLL 18", alg: "r U R' U R U2 r2 U' R U' R' U2 r" }, { name: "OLL 19", alg: "M U R U R' U' M' R' F R F'" }, { name: "OLL 20", alg: "M U R U R' U' M2 U R U' r'" }, { name: "OLL 21", alg: "y R U2 R' U' R U R' U' R U' R'" }, { name: "OLL 22", alg: "R U2 R2 U' R2 U' R2 U2 R" }, { name: "OLL 23", alg: "R2 D R' U2 R D' R' U2 R'" }, { name: "OLL 24", alg: "r U R' U' r' F R F'" }, { name: "OLL 25", alg: "y F' r U R' U' r' F R" }, { name: "OLL 26", alg: "y R U2 R' U' R U' R'" }, { name: "OLL 27", alg: "R U R' U R U2 R'" }, { name: "OLL 28", alg: "r U R' U' M U R U' R'" }, { name: "OLL 29", alg: "M U R U R' U' R' F R F' M'" }, { name: "OLL 30", alg: "y2 F U R U2 R' U' R U2 R' U' F'" }, { name: "OLL 31", alg: "R' U' F U R U' R' F' R" }, { name: "OLL 32", alg: "S R U R' U' R' F R f'" }, { name: "OLL 33", alg: "R U R' U' R' F R F'" }, { name: "OLL 34", alg: "y2 R U R2 U' R' F R U R U' F'" }, { name: "OLL 35", alg: "R U2 R2 F R F' R U2 R'" }, { name: "OLL 36", alg: "y2 L' U' L U' L' U L U L F' L' F" }, { name: "OLL 37", alg: "F R U' R' U' R U R' F'" }, { name: "OLL 38", alg: "R U R' U R U' R' U' R' F R F'" }, { name: "OLL 39", alg: "y L F' L' U' L U F U' L'" }, { name: "OLL 40", alg: "y R' F R U R' U' F' U R" }, { name: "OLL 41", alg: "y2 R U R' U R U2 R' F R U R' U' F'" }, { name: "OLL 42", alg: "R' U' R U' R' U2 R F R U R' U' F'" }, { name: "OLL 43", alg: "f' L' U' L U f" }, { name: "OLL 44", alg: "f R U R' U' f'" }, { name: "OLL 45", alg: "F R U R' U' F'" }, { name: "OLL 46", alg: "R' U' R' F R F' U R" }, { name: "OLL 47", alg: "F' L' U' L U L' U' L U F" }, { name: "OLL 48", alg: "F R U R' U' R U R' U' F'" }, { name: "OLL 49", alg: "y2 r U' r2 U r2 U r2 U' r" }, { name: "OLL 50", alg: "r' U r2 U' r2 U' r2 U r'" }, { name: "OLL 51", alg: "f R U R' U' R U R' U' f'" }, { name: "OLL 52", alg: "R U R' U R d' R U' R' F'" }, { name: "OLL 53", alg: "r' U' R U' R' U R U' R' U2 r" }, { name: "OLL 54", alg: "r U R' U R U' R' U R U2 r'" }, { name: "OLL 55", alg: "R U2 R2 U' R U' R' U2 F R F'" }, { name: "OLL 56", alg: "r U r' U R U' R' U R U' R' r U' r'" }, { name: "OLL 57", alg: "R U R' U' M' U R U' r'" }],
-  PLL: [{ name: "Aa", alg: "l' U R' D2 R U' R' D2 R2 x'" }, { name: "Ab", alg: "l' R' D2 R U R' D2 R U' R x'" }, { name: "E", alg: "y x' R U' R' D R U R' D' R U R' D R U' R' D' x" }, { name: "F", alg: "y R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R" }, { name: "Ga", alg: "R2 u R' U R' U' R u' R2 y' R' U R" }, { name: "Gb", alg: "R' U' R U D' R2 U R' U R U' R U' R2 D" }, { name: "Gc", alg: "y2 R2 F2 R U2 R U2 R' F R U R' U' R' F R2" }, { name: "Gd", alg: "R U R' U' D R2 U' R U' R' U R' U R2 D'" }, { name: "H", alg: "M2 U' M2 U2 M2 U' M2" }, { name: "Ja", alg: "L' U2 L U L' U2 R U' L U R'" }, { name: "Jb", alg: "R U R' F' R U R' U' R' F R2 U' R'" }, { name: "Na", alg: "R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'" }, { name: "Nb", alg: "R' U L' U2 R U' L R' U L' U2 R U' L" }, { name: "Ra", alg: "y2 R U2 R' U2 R B' R' U' R U R B R2" }, { name: "Rb", alg: "R' U2 R U2 R' F R U R' U' R' F' R2" }, { name: "T", alg: "R U R' U' R' F R2 U' R' U' R U R' F'" }, { name: "Ua", alg: "y2 R U' R U R U R U' R' U' R2" }, { name: "Ub", alg: "y2 R2 U R U R' U' R' U' R' U R'" }, { name: "V", alg: "z D' R2 D R2 U R' D' R U' R U R' D R U' z'" }, { name: "Y", alg: "F R U' R' U' R U R' F' R U R' U' R' F R F'" }, { name: "Z", alg: "M2 U' M2 U' M' U2 M2 U2 M'" }],
+  PLL: [{ name: "Aa", alg: "l' U R' D2 R U' R' D2 R2 x'" }, { name: "Ab", alg: "l' R' D2 R U R' D2 R U' R x'" }, { name: "E", alg: "y x' R U' R' D R U R' D' R U R' D R U' R' D' x" }, { name: "F", alg: "y R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R" }, { name: "Ga", alg: "R2 u R' U R' U' R u' R2 y' R' U R" }, { name: "Gb", alg: "R' U' R D' U R2 U R' U R U' R U' R2 D" }, { name: "Gc", alg: "y2 R2 F2 R U2 R U2 R' F R U R' U' R' F R2" }, { name: "Gd", alg: "R U R' D U' R2 U' R U' R' U R' U R2 D'" }, { name: "H", alg: "M2 U' M2 U2 M2 U' M2" }, { name: "Ja", alg: "L' U2 L U L' U2 R U' L U R'" }, { name: "Jb", alg: "R U R' F' R U R' U' R' F R2 U' R'" }, { name: "Na", alg: "R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'" }, { name: "Nb", alg: "R' U L' U2 R U' L R' U L' U2 R U' L" }, { name: "Ra", alg: "y2 R U2 R' U2 R B' R' U' R U R B R2" }, { name: "Rb", alg: "R' U2 R U2 R' F R U R' U' R' F' R2" }, { name: "T", alg: "R U R' U' R' F R2 U' R' U' R U R' F'" }, { name: "Ua", alg: "y2 R U' R U R U R U' R' U' R2" }, { name: "Ub", alg: "y2 R2 U R U R' U' R' U' R' U R'" }, { name: "V", alg: "z D' R2 D R2 U R' D' R U' R U R' D R U' z'" }, { name: "Y", alg: "F R U' R' U' R U R' F' R U R' U' R' F R F'" }, { name: "Z", alg: "M2 U' M2 U' M' U2 M2 U2 M'" }],
   TEST1: [{name: "AA", alg: "y x R2 r L x z L' r2 U F B l' x'"}, {name: "MM", alg: "R U R' U' M' U R U' r'"}, {name: "AB", alg: "u R2 r L x z L' r2 U F B l' x'"},  {name: "AC", alg: "y x R2 x x z x2 x' x'"}, {name: "test", alg: "R y x"}, {name: "test", alg: "x y R"}, {name: "test", alg: "x y z R"},  {name: "test", alg: "y' R y'"}, {name: "test", alg: "x' R x'"}, {name: "test", alg: "z' R z'"},  {name: "test", alg: "y x R x"}, {name: "test", alg: "x R"}, {name: "test", alg: "z R"}],
   TEST2: [{ name: "Z", alg: "R U R' U'" }, { name: "H", alg: "R U R' U'" }]
 }
@@ -138,6 +142,7 @@ export default {
     settingsAlgSet: '',
     settingsSelector: '',
     settingsTimer: '',
+    settingsWaitTime: 1.0,
 
     twistyPlayer: null, // TODO: display just the cube and not the entire player window
     item: {name: "invalid", alg: ""},
@@ -169,6 +174,7 @@ export default {
         if (this.startTime === null) {
           this.startTimer(e)
         }
+        // TODO: when pushing move, set cube "timeStamp" to processor.now().
         this.moves.push(e)
       })
     },
@@ -188,6 +194,10 @@ export default {
       window.puzzle = null
 
       this.selectNewAlg(this.item.index)
+      // stop timer when reset
+      clearInterval(this.timerID)
+      this.startTime = null
+      this.timerID = null
     },
     startTimer (e) {
       this.startTime = performance.now()
@@ -217,14 +227,13 @@ export default {
         } else {
           this.stopTimer(moves[moves.length - 1]) // Ensure the timer is "stopped" at the moment the last move is made (keep track of that time) instead of the time that processing/computation is finished
           this.waitingNewAlg = true
-          // TODO: add feature to remove this pause.
           setTimeout(() => {
             // If cube isn't in a solved state, require the cube to be solved before proceeding
             // This is handled by code in the onMove handler that executes a new move each time it arrives and checks whether the cube is solved from above.
             if (EquivalentTransformations(Puzzles['3x3x3'], this.puzzleState.state, new KPuzzle(Puzzles['3x3x3']).state)) {
               this.selectNewAlg()
             }
-          }, 1000)
+          }, this.settings.waitTime)
         }
       }
     },
@@ -277,10 +286,11 @@ export default {
     this.ALG_SETS = ALG_SETS
     this.timesList = getFromLocalStorage('timesList', []) // TODO: add more granularity to support session names
 
-    this.settings = getFromLocalStorage('algTrainerSettings', {algSet: "PLL", selector: "random", timer: "browser"})
+    this.settings = getFromLocalStorage('algTrainerSettings', {algSet: "PLL", selector: "random", timer: "browser", waitTime: 1000})
     this.settingsAlgSet = this.settings.algSet
     this.settingsSelector = this.settings.selector
     this.settingsTimer = this.settings.timer
+    this.settingsWaitTime = this.settings.waitTime
   },
   mounted () {
     // document.addEventListener('keydown', (e) => {
