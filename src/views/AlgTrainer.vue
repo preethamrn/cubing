@@ -214,7 +214,18 @@ export default {
     },
   },
   watch: {
-    settings () {
+    settings (newSettings, oldSettings) {
+      if (newSettings.algSet === oldSettings.algSet && newSettings.selector === oldSettings.selector) return
+      
+      if (oldSettings.selector === 'sequential') {
+        let confirmation = confirm('This will reset your progress in the alg set. Continue?')
+        if (!confirmation) {
+          this.settings.selector = oldSettings.selector
+          this.settings.algSet = oldSettings.algSet
+          return
+        }
+      }
+
       this.algSet = ALG_SETS[this.settings.algSet]
       // load custom algs
       let customAlgs = localStorage.getItem(`customAlgs.${this.settings.algSet}`)

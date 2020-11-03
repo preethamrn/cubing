@@ -50,14 +50,24 @@ export default {
   props: {
     value: Object,
   },
+  methods: {
+    updateValues (value) {
+      this.algSet = value.algSet
+      this.selector = value.selector
+      this.hideAlg = value.hideAlg
+      this.timer = value.timer
+      this.waitTime = value.waitTime
+    }
+  },
+  watch: {
+    value () {
+      this.updateValues(this.value)
+    }
+  },
   created () {
     this.ALG_SETS = ALG_SETS
     let value = getFromLocalStorage('algTrainerSettings', {algSet: "PLL", selector: "random", timer: "browser", waitTime: 1000, hideAlg: false})
-    this.algSet = value.algSet
-    this.selector = value.selector
-    this.hideAlg = value.hideAlg
-    this.timer = value.timer
-    this.waitTime = value.waitTime
+    this.updateValues(value)
     this.$emit('input', value)
   }
 }
