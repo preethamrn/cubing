@@ -1,6 +1,9 @@
 <template>
   <span class="scramble">
     <div class="name">{{name}}</div>
+    <div class="edit">
+      <v-icon color='white' @click="updateAlg">fas fa-edit</v-icon>
+    </div>
     <span class="correct"> {{algToString(difference.correct)}} </span>
     <span class="incorrect"> {{algToString(difference.incorrect)}} </span>
     <span class="partial"> {{algToString(difference.partial)}} </span>
@@ -70,11 +73,23 @@ export default {
     scramble: String,
     name: String,
     index: Number,
+    algSetName: String,
   },
   methods: {
     algToString (moves) {
       if (!moves) return ""
       return algToString(new Sequence(moves))
+    },
+    updateAlg () {
+      let algs = localStorage.getItem(`customAlgs.${this.algSetName}`)
+      if (algs) algs = JSON.parse(algs)
+      else algs = {}
+      let newAlg = prompt(`Set a custom alg for ${this.name} (leave empty to continue using the same alg)`)
+      // TODO: validate the new alg before saving (1. validate the moves are good, 2. validate the state is solved)
+      if (newAlg) {
+        algs[this.name] = newAlg
+        localStorage.setItem(`customAlgs.${this.algSetName}`, JSON.stringify(algs))
+      }
     },
     reset () {
       // reset puzzle state
@@ -248,6 +263,10 @@ span::after {
 .name {
   display: inline-block;
   font-weight: 600;
+  padding-right: 10px;
+}
+.edit {
+  display: inline-block;
   padding-right: 40px;
 }
 .correct {

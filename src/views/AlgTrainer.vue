@@ -2,7 +2,7 @@
   <div class="algtrainer">
     <v-row class='top-bar'>
       <v-col cols='1' style='padding-left: 50px'>{{(x = selector && selector.progress()) ? `${x.pos + 1}/${x.total} ${x.pos >= x.total ? 'DONE' : ''}` : ''}}</v-col>
-      <v-col offset='3'><scramble :scramble='item.alg' :name='item.name' :index='item.index' :moves='moves' @execMoves='executeMoves' ref='scramble' /></v-col>
+      <v-col offset='3'><scramble :scramble='item.alg' :name='item.name' :algSetName='settings.algSet' :index='item.index' :moves='moves' @execMoves='executeMoves' ref='scramble' /></v-col>
       <v-col cols='1' class='controls'>
         <settings v-model="settings" />
         <button @click='reset'>Reset</button>
@@ -85,9 +85,7 @@ class SequentialSelector {
 // TODO: fix bug with executeMoves when the cube should be solved but the last move is incorrect (this will probably require a fix in Scramble to support incorrect moves even after processedScramble is exhausted)
 // TODO: custom orientation
 
-// TODO: sessions
 // TODO: support rotation/orientation agnostic EquivalentTransformations for solved states
-// TODO: support custom algs
 
 export default {
   name: "algtrainer",
@@ -214,6 +212,17 @@ export default {
   watch: {
     settings () {
       this.algSet = ALG_SETS[this.settings.algSet]
+      // load custom algs
+      let customAlgs = localStorage.getItem(`customAlgs.${this.settings.algSet}`)
+      if (customAlgs) {
+        customAlgs = JSON.parse(customAlgs)
+        this.algSet.forEach((v, i) => {
+          if (customAlgs[v.name] !== undefined) {
+            this.algSet[i].alg = customAlgs[v.name]
+          }
+        })
+      }
+
       switch(this.settings.selector) {
         case 'random': {
           this.selector = new RandomSelector(this.algSet.length)
