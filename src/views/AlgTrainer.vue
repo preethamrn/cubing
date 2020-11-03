@@ -15,7 +15,7 @@
         <div class='main-timer'>{{displayTime(elapsedTime)}}</div>
         <div class='times-list'>
           <!-- TODO: add more stats in the times list -->
-          <div v-for='({time, item}, index) in timesList' :key='index'>
+          <div v-for='({time, item}, index) in timesList' :key='index' @click='deleteTime(index)'>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on" style='display: inline-block;'>
@@ -129,6 +129,9 @@ export default {
         this.moves.push(e)
       })
     },
+    deleteTime (index) {
+      this.timesList = this.timesList.slice(0, index).concat(this.timesList.slice(index+1))
+    },
     reset () {
       if (this.selector === null) return // On page load don't reset until the selector is created. This is done in the settings watcher which automatically triggers reset.
 
@@ -160,6 +163,7 @@ export default {
     stopTimer (e) {
       clearInterval(this.timerID)
       if (this.settings.timer === 'cube' && e.timeStamp && this.cubeStartTime) this.elapsedTime = (e.timeStamp - this.cubeStartTime)
+      // TODO: add more information like algSet, date/time to this.
       this.timesList.unshift({time: this.elapsedTime, item: this.item})
       this.startTime = null
       this.timerID = null
