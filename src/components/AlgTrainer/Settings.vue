@@ -9,7 +9,7 @@
       </v-card-title>
       <v-card-text>
         <b>How do you want to select algs?</b>
-        <v-select v-model="selector" :items="[{'name': 'Randomly', 'type': 'random'}, {'name': 'Sequentially', 'type': 'sequential'}]" item-text='name' item-value='type' />
+        <v-select v-model="selector" :items="[{'name': 'Randomly', 'type': 'random'}, {'name': 'Sequentially', 'type': 'sequential'}, {'name': 'Shuffled', 'type': 'shuffled'}]" item-text='name' item-value='type' />
         <b>What alg set would you like to train?</b>
         <v-select v-model="algSet" :items='Object.keys(ALG_SETS)' />
         <v-switch v-model="hideAlg" inset>

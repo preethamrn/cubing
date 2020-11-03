@@ -42,7 +42,7 @@ import { TwistyPlayer } from "cubing/twisty"
 import Scramble from "../components/AlgTrainer/Scramble"
 import Settings from "../components/AlgTrainer/Settings"
 import {ALG_SETS} from "../components/AlgTrainer/alg_sets"
-import {getFromLocalStorage} from "../utils/utils"
+import {getFromLocalStorage, shuffle} from "../utils/utils"
 
 async function asyncSetup(twistyPlayer) {
   // TODO: remove this setup if not required
@@ -82,9 +82,27 @@ class SequentialSelector {
     return { pos: this.curr - this.start - 1, total: this.length } // Offset curr by 1 because it is auto-incremented
   }
 }
+
+class ShuffledSelector {
+  constructor(length, items, curr) {
+    this.length = length
+    let temp = (new Array(45)).fill(0).map((v, i) => (i))
+    this.items = items || shuffle(temp)
+    this.curr = curr ? curr - 1 : 0 // When curr is already set, we need to go back one alg because curr is auto-incremented in select() so on page refresh we will actually be one alg ahead even if we didn't actually do the alg.
+  }
+  select () {
+    let ret = this.items[this.curr % this.length]
+    this.curr++
+    return ret
+  }
+  progress () {
+    return { pos: this.curr - 1, total: this.length } // Offset curr by 1 because it is auto-incremented
+  }
+}
+
+
 // TODO: fix bug with executeMoves when the cube should be solved but the last move is incorrect (this will probably require a fix in Scramble to support incorrect moves even after processedScramble is exhausted)
 // TODO: custom orientation
-
 // TODO: support rotation/orientation agnostic EquivalentTransformations for solved states
 
 export default {
@@ -217,7 +235,7 @@ export default {
     settings (newSettings, oldSettings) {
       if (newSettings.algSet === oldSettings.algSet && newSettings.selector === oldSettings.selector) return
       
-      if (oldSettings.selector === 'sequential') {
+      if (oldSettings.selector === 'sequential' || oldSettings.selector === 'shuffled') {
         let confirmation = confirm('This will reset your progress in the alg set. Continue?')
         if (!confirmation) {
           this.settings.selector = oldSettings.selector
@@ -244,13 +262,24 @@ export default {
           break
         }
         case 'sequential': {
-          let sequentialSelectorState = localStorage.getItem('sequentialSelectorState')
-          if (sequentialSelectorState) {
-            let v = JSON.parse(sequentialSelectorState)
+          let selectorState = localStorage.getItem('selectorState')
+          if (selectorState) {
+            let v = JSON.parse(selectorState)
             this.selector = new SequentialSelector(v.length, v.start, v.curr)
-            localStorage.removeItem('sequentialSelectorState')
+            localStorage.removeItem('selectorState')
           } else {
             this.selector = new SequentialSelector(this.algSet.length)
+          }
+          break
+        }
+        case 'shuffled': {
+          let selectorState = localStorage.getItem('selectorState')
+          if (selectorState) {
+            let v = JSON.parse(selectorState)
+            this.selector = new ShuffledSelector(v.length, v.items, v.curr)
+            localStorage.removeItem('selectorState')
+          } else {
+            this.selector = new ShuffledSelector(this.algSet.length)
           }
           break
         }
@@ -275,8 +304,11 @@ export default {
     window.onbeforeunload = () => {
       localStorage.setItem('timesList', JSON.stringify(this.timesList))
       localStorage.setItem('algTrainerSettings', JSON.stringify(this.settings))
-      if (this.selector instanceof SequentialSelector) localStorage.setItem('sequentialSelectorState', JSON.stringify(this.selector))
-      else localStorage.removeItem('sequentialSelectorState')
+      if (this.selector instanceof SequentialSelector || this.selector instanceof ShuffledSelector) {
+        localStorage.setItem('selectorState', JSON.stringify(this.selector))
+      } else {
+        localStorage.removeItem('selectorState')
+      }
     }
   },
 }
