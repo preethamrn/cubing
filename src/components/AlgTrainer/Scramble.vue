@@ -90,6 +90,7 @@ export default {
       let newAlg = prompt(`Set a custom alg for ${this.name} (leave empty to continue using the same alg)`)
       // TODO: validate the new alg before saving (1. validate the moves are good, 2. validate the state is solved)
       if (newAlg) {
+        // TODO: if alg is updated, then update the alg in alg sets (and reset())
         algs[this.name] = newAlg
         localStorage.setItem(`customAlgs.${this.algSetName}`, JSON.stringify(algs))
       }
