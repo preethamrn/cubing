@@ -2,7 +2,7 @@
   <div class="algtrainer">
     <v-row class='top-bar'>
       <v-col cols='1' style='padding-left: 50px'>{{(x = selector && selector.progress()) ? `${x.pos + 1}/${x.total} ${x.pos >= x.total ? 'DONE' : ''}` : ''}}</v-col>
-      <v-col offset='3'><scramble :scramble='item.alg' :name='item.name' :algSetName='settings.algSet' :index='item.index' :moves='moves' @execMoves='executeMoves' ref='scramble' /></v-col>
+      <v-col offset='3'><scramble :settings='settings' :scramble='item.alg' :name='item.name' :algSetName='settings.algSet' :index='item.index' :moves='moves' @execMoves='executeMoves' ref='scramble' /></v-col>
       <v-col cols='1' class='controls'>
         <settings v-model="settings" />
         <button @click='reset'>Reset</button>

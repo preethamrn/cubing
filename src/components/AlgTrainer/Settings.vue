@@ -12,6 +12,11 @@
         <v-select v-model="selector" :items="[{'name': 'Randomly', 'type': 'random'}, {'name': 'Sequentially', 'type': 'sequential'}]" item-text='name' item-value='type' />
         <b>What alg set would you like to train?</b>
         <v-select v-model="algSet" :items='Object.keys(ALG_SETS)' />
+        <v-switch v-model="hideAlg" inset>
+          <template v-slot:label>
+            <b>{{hideAlg ? 'Show alg' : 'Hide alg'}}</b>
+          </template>
+        </v-switch>
         <b>What timer would you like to use?</b>
         <v-select v-model="timer" :items="[{'name': 'Browser time', 'type': 'browser'}, {'name': 'Inbuilt cube timestamps', 'type': 'cube'}]" item-text='name' item-value='type' />
         <b>How long should the the trainer wait between solves (set to 0 for no pause)?</b>
@@ -22,7 +27,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <!-- TODO: changing certain settings (eg. waitTime) shouldn't reset the alg set -->
-        <v-btn color="primary" text @click="modal = false; $emit('input', {algSet, selector, timer, waitTime});">Save</v-btn>
+        <v-btn color="primary" text @click="modal = false; $emit('input', {algSet, selector, timer, waitTime, hideAlg});">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -38,6 +43,7 @@ export default {
     modal: false,
     algSet: '',
     selector: '',
+    hideAlg: false,
     timer: '',
     waitTime: 1000,
   }),
@@ -46,9 +52,10 @@ export default {
   },
   created () {
     this.ALG_SETS = ALG_SETS
-    let value = getFromLocalStorage('algTrainerSettings', {algSet: "PLL", selector: "random", timer: "browser", waitTime: 1000})
+    let value = getFromLocalStorage('algTrainerSettings', {algSet: "PLL", selector: "random", timer: "browser", waitTime: 1000, hideAlg: false})
     this.algSet = value.algSet
     this.selector = value.selector
+    this.hideAlg = value.hideAlg
     this.timer = value.timer
     this.waitTime = value.waitTime
     this.$emit('input', value)

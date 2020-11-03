@@ -4,10 +4,12 @@
     <div class="edit">
       <v-icon color='white' @click="updateAlg">fas fa-edit</v-icon>
     </div>
-    <span class="correct"> {{algToString(difference.correct)}} </span>
-    <span class="incorrect"> {{algToString(difference.incorrect)}} </span>
-    <span class="partial"> {{algToString(difference.partial)}} </span>
-    <span class="todo"> {{algToString(difference.todo)}} </span>
+    <div style="display: inline-block" v-if="!settings.hideAlg">
+      <span class="correct"> {{algToString(difference.correct)}} </span>
+      <span class="incorrect"> {{algToString(difference.incorrect)}} </span>
+      <span class="partial"> {{algToString(difference.partial)}} </span>
+      <span class="todo"> {{algToString(difference.todo)}} </span>
+    </div>
   </span>
 </template>
 
@@ -69,6 +71,7 @@ export default {
     difference: {},
   }),
   props: {
+    settings: Object,
     moves: Array,
     scramble: String,
     name: String,
