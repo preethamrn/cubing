@@ -86,7 +86,7 @@ class SequentialSelector {
 class ShuffledSelector {
   constructor(length, items, curr) {
     this.length = length
-    let temp = (new Array(45)).fill(0).map((v, i) => (i))
+    let temp = (new Array(this.length)).fill(0).map((v, i) => (i))
     this.items = items || shuffle(temp)
     this.curr = curr ? curr - 1 : 0 // When curr is already set, we need to go back one alg because curr is auto-incremented in select() so on page refresh we will actually be one alg ahead even if we didn't actually do the alg.
   }
