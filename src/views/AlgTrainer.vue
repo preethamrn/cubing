@@ -248,7 +248,7 @@ export default {
   },
   watch: {
     settings (newSettings, oldSettings) {
-      if (newSettings.algSet === oldSettings.algSet && newSettings.selector === oldSettings.selector) return
+      if (newSettings.algSet === oldSettings.algSet && newSettings.selector === oldSettings.selector && newSettings.selector !== 'custom') return
       
       if (oldSettings.selector === 'sequential' || oldSettings.selector === 'shuffled') {
         let confirmation = confirm('This will reset your progress in the alg set. Continue?')

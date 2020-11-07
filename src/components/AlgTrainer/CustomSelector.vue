@@ -45,7 +45,7 @@ export default {
     nosaveCustomSelector () {
       let customAlgs = localStorage.getItem('customAlgSet')
       if (!customAlgs) {
-        location.setItem('customAlgSet', JSON.stringify({name: "PLL", list: [0, 1]}))
+        localStorage.setItem('customAlgSet', JSON.stringify({name: "PLL", list: [0, 1]}))
       }
     },
     saveCustomSelector () {
@@ -62,7 +62,16 @@ export default {
     algSet: {
       immediate: true,
       handler () {
-        this.algsList = new Array(ALG_SETS[this.algSet].list.length).fill(true)
+        this.algsList = new Array(ALG_SETS[this.algSet].list.length).fill(false)
+        
+        // backfill any algs that have already been set
+        let customAlgs = localStorage.getItem('customAlgSet')
+        customAlgs = JSON.parse(customAlgs)
+        if (customAlgs && customAlgs.name === this.algSet) {
+          customAlgs.list.forEach(v => {
+            this.algsList[v] = true
+          })
+        }
       }
     }
   },
