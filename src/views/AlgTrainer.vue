@@ -37,7 +37,7 @@ import {
   connect,
   debugKeyboardConnect,
 } from "cubing/bluetooth"
-import { KPuzzle, Puzzles, EquivalentTransformations } from "cubing/kpuzzle"
+import { KPuzzle, Puzzles } from "cubing/kpuzzle"
 import { TwistyPlayer } from "cubing/twisty"
 import Scramble from "../components/AlgTrainer/Scramble"
 import Settings from "../components/AlgTrainer/Settings"
@@ -103,8 +103,9 @@ class ShuffledSelector {
 
 // TODO: fix bug with executeMoves when the cube should be solved but the last move is incorrect (this will probably require a fix in Scramble to support incorrect moves even after processedScramble is exhausted)
 // TODO: custom algs list ("custom" alg selector + show a popup modal where they can select the alg list. the selector object keeps track of the list of indices. custom is always random for now)
-// TODO: support rotation/orientation agnostic EquivalentTransformations for solved states
 // TODO: validate the new alg before saving (1. validate the moves are good, 2. validate the state is solved using EquivalentTransformation similar to above)
+// TODO: add cube successfully connected popup after connect
+// TODO: support AUFs for solved state checkers
 
 export default {
   name: "algtrainer",
@@ -126,7 +127,10 @@ export default {
     onMoveCallback: null,
 
     settings: {},
-    algSet: [{ name: "loading", alg: "R U R' U'" }],
+    algSet: {
+      list: [{ name: "loading", alg: "R U R' U'" }],
+      checker: () => true,
+    },
 
     timesList: [],
   }),
@@ -194,8 +198,7 @@ export default {
       blockMoves.forEach(v => {
         this.twistyPlayer.experimentalAddMove(v)
       })
-      // TODO: Set EquivalentTransformation to only care about the required pieces. Each alg set has a different completion condition (eg. COLL permutes corners, ZBLL fully solves, OLL only orients and doesn't care about permutation, PLL doesn't care about final rotation)
-      if (EquivalentTransformations(Puzzles['3x3x3'], this.puzzleState.state, new KPuzzle(Puzzles['3x3x3']).state)) {
+      if (this.algSet.checker(Puzzles['3x3x3'], this.puzzleState.state, new KPuzzle(Puzzles['3x3x3']).state)) {
         if (this.waitingNewAlg) {
           this.selectNewAlg()
         } else {
@@ -204,7 +207,7 @@ export default {
           setTimeout(() => {
             // If cube isn't in a solved state, require the cube to be solved before proceeding
             // This is handled by code in the onMove handler that executes a new move each time it arrives and checks whether the cube is solved from above.
-            if (EquivalentTransformations(Puzzles['3x3x3'], this.puzzleState.state, new KPuzzle(Puzzles['3x3x3']).state)) {
+            if (this.algSet.checker(Puzzles['3x3x3'], this.puzzleState.state, new KPuzzle(Puzzles['3x3x3']).state)) {
               this.selectNewAlg()
             }
           }, this.settings.waitTime)
@@ -215,7 +218,7 @@ export default {
       this.waitingNewAlg = false
       if (i === undefined) {
         let index = this.selector.select()
-        this.item = this.algSet[index]
+        this.item = this.algSet.list[index]
         this.item.index = index
       }
       this.$refs.scramble.reset()
@@ -250,16 +253,16 @@ export default {
       let customAlgs = localStorage.getItem(`customAlgs.${this.settings.algSet}`)
       if (customAlgs) {
         customAlgs = JSON.parse(customAlgs)
-        this.algSet.forEach((v, i) => {
+        this.algSet.list.forEach((v, i) => {
           if (customAlgs[v.name] !== undefined) {
-            this.algSet[i].alg = customAlgs[v.name]
+            this.algSet.list[i].alg = customAlgs[v.name]
           }
         })
       }
 
       switch(this.settings.selector) {
         case 'random': {
-          this.selector = new RandomSelector(this.algSet.length)
+          this.selector = new RandomSelector(this.algSet.list.length)
           break
         }
         case 'sequential': {
@@ -269,7 +272,7 @@ export default {
             this.selector = new SequentialSelector(v.length, v.start, v.curr)
             localStorage.removeItem('selectorState')
           } else {
-            this.selector = new SequentialSelector(this.algSet.length)
+            this.selector = new SequentialSelector(this.algSet.list.length)
           }
           break
         }
@@ -280,7 +283,7 @@ export default {
             this.selector = new ShuffledSelector(v.length, v.items, v.curr)
             localStorage.removeItem('selectorState')
           } else {
-            this.selector = new ShuffledSelector(this.algSet.length)
+            this.selector = new ShuffledSelector(this.algSet.list.length)
           }
           break
         }
