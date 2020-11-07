@@ -19,6 +19,8 @@
       <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
+        <v-btn color="green" text @click="selectAll">Select All</v-btn>
+        <v-btn color="green" text @click="deselectAll">Deselect All</v-btn>
         <v-btn color="red" text @click="modal = false; nosaveCustomSelector();">Close</v-btn>
         <v-btn color="primary" text @click="modal = false; saveCustomSelector();">Save</v-btn>
       </v-card-actions>
@@ -56,7 +58,12 @@ export default {
         list: this.algNums,
       }))
     },
-    // TODO: add select all, deselect all options
+    selectAll () {
+      this.algsList.forEach((v,i) => {this.$set(this.algsList, i, true)})
+    },
+    deselectAll () {
+      this.algsList.forEach((v,i) => {this.$set(this.algsList, i, false)})
+    },
   },
   watch: {
     algSet: {
