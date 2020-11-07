@@ -100,6 +100,18 @@ class ShuffledSelector {
   }
 }
 
+class CustomSelector {
+  constructor(items) {
+    this.items = items
+  }
+  select () {
+    return this.items[Math.floor(Math.random() * Math.floor(this.items.length))]
+  }
+  progress () {
+    return null
+  }
+}
+
 
 // TODO: fix bug with executeMoves when the cube should be solved but the last move is incorrect (this will probably require a fix in Scramble to support incorrect moves even after processedScramble is exhausted)
 // TODO: custom algs list ("custom" alg selector + show a popup modal where they can select the alg list. the selector object keeps track of the list of indices. custom is always random for now)
@@ -284,6 +296,12 @@ export default {
           } else {
             this.selector = new ShuffledSelector(this.algSet.list.length)
           }
+          break
+        }
+        case 'custom': {
+          let customAlgs = localStorage.getItem('customAlgSet')
+          customAlgs = JSON.parse(customAlgs)
+          this.selector = new CustomSelector(customAlgs.list)
           break
         }
       }
