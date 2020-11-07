@@ -114,7 +114,6 @@ class CustomSelector {
 
 
 // TODO: fix bug with executeMoves when the cube should be solved but the last move is incorrect (this will probably require a fix in Scramble to support incorrect moves even after processedScramble is exhausted)
-// TODO: custom algs list ("custom" alg selector + show a popup modal where they can select the alg list. the selector object keeps track of the list of indices. custom is always random for now)
 // TODO: add cube successfully connected popup after connect
 // TODO: support AUFs for solved state checkers
 
