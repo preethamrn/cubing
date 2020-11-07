@@ -16,6 +16,7 @@
 <script>
 import { algToString, coalesceBaseMoves, invert, parse, BareBlockMove, Sequence } from "cubing/alg"
 import { KPuzzle, Puzzles, EquivalentTransformations } from "cubing/kpuzzle"
+import {ALG_SETS} from "./alg_sets"
 
 function mergeMappings (currentMapping, newMapping) {
   let merged = {}
@@ -84,12 +85,38 @@ export default {
       return algToString(new Sequence(moves))
     },
     updateAlg () {
-      let algs = localStorage.getItem(`customAlgs.${this.algSetName}`)
-      if (algs) algs = JSON.parse(algs)
-      else algs = {}
       let newAlg = prompt(`Set a custom alg for ${this.name} (leave empty to continue using the same alg)`)
-      // TODO: validate the new alg before saving (1. validate the moves are good, 2. validate the state is solved)
+
       if (newAlg) {
+        let valid = true
+        let newParsedAlg = parse(newAlg)
+        // 1. validate the moves are good
+        if (valid) {
+          for (let i=0; i < newParsedAlg.nestedUnits.length; i++) {
+            if (!('URFDLBurfdlbxyz'.includes(newParsedAlg.nestedUnits[i].family))) {
+              valid = false
+              break
+            }
+          }
+        }
+        
+        // 2. validate the state is solved
+        if (valid) {
+          let testPuzzle = new KPuzzle(Puzzles['3x3x3'])
+          testPuzzle.applyAlg(invert(parse(this.scramble)))
+          testPuzzle.applyAlg(newParsedAlg)
+          valid = valid && ALG_SETS[this.algSetName].checker(Puzzles['3x3x3'], testPuzzle.state, new KPuzzle(Puzzles['3x3x3']).state)
+        }
+
+        if (!valid) {
+          alert(`This alg is not a valid solution for ${this.name}`)
+          return
+        }
+
+        // set the updated alg
+        let algs = localStorage.getItem(`customAlgs.${this.algSetName}`)
+        if (algs) algs = JSON.parse(algs)
+        else algs = {}
         // TODO: if alg is updated, then update the alg in alg sets (and reset())
         algs[this.name] = newAlg
         localStorage.setItem(`customAlgs.${this.algSetName}`, JSON.stringify(algs))

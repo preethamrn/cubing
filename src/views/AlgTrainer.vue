@@ -103,7 +103,6 @@ class ShuffledSelector {
 
 // TODO: fix bug with executeMoves when the cube should be solved but the last move is incorrect (this will probably require a fix in Scramble to support incorrect moves even after processedScramble is exhausted)
 // TODO: custom algs list ("custom" alg selector + show a popup modal where they can select the alg list. the selector object keeps track of the list of indices. custom is always random for now)
-// TODO: validate the new alg before saving (1. validate the moves are good, 2. validate the state is solved using EquivalentTransformation similar to above)
 // TODO: add cube successfully connected popup after connect
 // TODO: support AUFs for solved state checkers
 
