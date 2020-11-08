@@ -73,6 +73,7 @@ export default {
       this.algsList.forEach((v,i) => {this.$set(this.algsList, i, false)})
     },
     drawSVG (alg) {
+      if (this.algsList.length > 100) return '' // Skip this when the algset is too big.
       if (!this.svgMap[alg]) {
         let svg = new SVG(Puzzles['3x3x3LL'])
         let puzzle = new KPuzzle(Puzzles['3x3x3LL'])
