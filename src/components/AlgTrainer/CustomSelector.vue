@@ -10,7 +10,8 @@
           <v-col cols='1'><b>{{alg.name}}</b></v-col>
           <!-- TODO: make the scramble previews more efficient (use lazy loading?) -->
           <v-col cols='2'>
-            <div style='width: 60px; height: 60px' v-html='drawSVG(alg.alg)'></div>
+            <v-lazy style='width: 60px; height: 60px' v-html='drawSVG(alg.alg)'>
+            </v-lazy>
           </v-col>
           <v-col cols='5'>{{alg.alg}}</v-col>
           <v-spacer></v-spacer>
@@ -42,6 +43,7 @@ export default {
   data: () => ({
     modal: false,
     algsList: [],
+    svgMap: {},
   }),
   props: {
     algSet: String,
@@ -71,11 +73,14 @@ export default {
       this.algsList.forEach((v,i) => {this.$set(this.algsList, i, false)})
     },
     drawSVG (alg) {
-      let svg = new SVG(Puzzles['3x3x3LL'])
-      let puzzle = new KPuzzle(Puzzles['3x3x3LL'])
-      puzzle.applyAlg(parse(alg))
-      svg.drawKPuzzle(puzzle)
-      return svg.element.innerHTML
+      if (!this.svgMap[alg]) {
+        let svg = new SVG(Puzzles['3x3x3LL'])
+        let puzzle = new KPuzzle(Puzzles['3x3x3LL'])
+        puzzle.applyAlg(parse(alg))
+        svg.drawKPuzzle(puzzle)
+        this.svgMap[alg] = svg.element.innerHTML
+      }
+      return this.svgMap[alg]
     },
   },
   watch: {
