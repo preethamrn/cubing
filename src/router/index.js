@@ -1,22 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from '../views/HomePage.vue'
 const AlgTrainer = () => import( '../views/AlgTrainer.vue')
 const TBLDTrainer = () => import( '../views/3BLDTrainer.vue')
 const Median = () => import( '../views/Median.vue')
-const Valorant = () => import( '../views/Valorant.vue')
-const StanzSheet = () => import( '../views/StanzSheet.vue')
 
 Vue.use(Router)
 
 const router = new Router({
   mode: 'history',
   routes: [
-    {
-      path: '/',
-      name: 'preethamrn',
-      component: Home
-    },
     {
       path: '/algtrainer',
       name: 'Alg Trainer',
@@ -34,18 +26,6 @@ const router = new Router({
       name: 'Median',
       component: Median,
       meta: {title: 'MonkeyLeague Median'},
-    },
-    {
-      path: '/valorant',
-      name: 'Valorant',
-      component: Valorant,
-      meta: {title: 'Valorant Player History'},
-    },
-    {
-      path: '/stanzsheet',
-      name: "StanzSheet",
-      component: StanzSheet,
-      meta: {title: "Stanz's Spreadsheet"},
     },
   ]
 })
