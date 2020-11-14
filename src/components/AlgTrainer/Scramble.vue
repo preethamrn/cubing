@@ -109,8 +109,8 @@ export default {
         }
 
         if (!valid) {
-          alert(`This alg is not a valid solution for ${this.name}`)
-          return
+          let confirmation = confirm(`AlgTrainer could not confirm that ${newAlg} is a valid solution for ${this.name}. Replace anyway?`)
+          if (!confirmation) return
         }
 
         // set the updated alg
