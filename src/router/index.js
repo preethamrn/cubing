@@ -7,6 +7,7 @@ const Median = () => import( '../views/Median.vue')
 Vue.use(Router)
 
 const router = new Router({
+  base: '/cubing/',
   mode: 'history',
   routes: [
     {
