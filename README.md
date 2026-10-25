@@ -1,29 +1,32 @@
-# preethamrn.com
+# Cubing Lab
 
-## Project setup
-```
+A Vue 3 application with an algorithm trainer, a 3BLD memo trainer, and a csTimer median calculator.
+The app is deployed below `/cubing/` on GitHub Pages.
+
+## Requirements
+
+- Node.js 22.12 or newer (the project pins Node 22 in `.nvmrc`)
+- npm
+
+## Local development
+
+```sh
 npm install
+npm run dev
 ```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+Vite uses the production base path, so open the app at the `/cubing/` URL shown by the dev server.
+The algorithm trainer also supports keyboard moves (`U R F D L B`; hold Shift for an inverse turn).
+Smart-cube Bluetooth requires HTTPS and a browser with Web Bluetooth support.
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Build and checks
 
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
+```sh
 npm run lint
+npm test
+npm run build
+npm run preview
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+The production build is written to `dist/`. The existing `deploy.sh` publishes that directory to the
+`gh-pages` branch.

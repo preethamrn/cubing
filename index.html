@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0f14" />
+    <meta
+      name="description"
+      content="A set of tools for cubers: algorithm practice, blindfold memo training, and competition result medians."
+    />
+    <link rel="icon" href="%BASE_URL%favicon.ico" />
+    <title>Cubing Lab</title>
+    <script>
+      const redirect = sessionStorage.getItem('redirect')
+      sessionStorage.removeItem('redirect')
+      if (redirect) {
+        try {
+          const target = new URL(redirect, location.origin)
+          if (target.origin === location.origin) {
+            history.replaceState(null, '', `${target.pathname}${target.search}${target.hash}`)
+          }
+        } catch {
+          // Ignore an invalid redirect left in session storage.
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,338 +1,409 @@
-<template>
-  <div class="bldtrainer3">
-    <v-container>
-      <v-bottom-sheet v-model='dialog' scrollable>
-        <template v-slot:activator='{on}'>
-          <v-layout row style='padding: 20px 0 20px 0'>
-            <v-flex xs5>
-              <h1>3BLD Trainer</h1>
-              <vue-kofi uid='preetham' />
-            </v-flex>
-            <v-flex xs7><v-btn color='blue' style='font-weight: bold !important; font-family: "Lucida Console", Monaco, monospace !important;' dark v-on='on'>Settings</v-btn></v-flex>
-          </v-layout>
-        </template>
-        <v-container class='bottomsheet'>
-          <h1>Settings</h1>
-          <v-layout row wrap style='padding: 10px 0 10px 0'>
-            <v-flex xs3>
-              <h2>Memo Type</h2>
-              <v-radio-group v-model='radioGroup' @change='next' style='font-family: "Lucida Console", Monaco, monospace !important;'>
-                <v-radio label='Corners' :value='1' />
-                <v-radio label='Edges' :value='2' />
-              </v-radio-group>
-            </v-flex>
-            <v-flex xs3>
-              <h2>Corners Letter Scheme</h2>
-              <div v-for='corner in Object.keys(corners)' :key='corner'>
-                <span class='option'>{{corner}}: </span><input v-model='corners[corner]' :prefix='corner + ":"' style='border-style: groove; width: 30px;'/>
-              </div>
-            </v-flex>
-            <v-flex xs3>
-              <h2>Edges Letter Scheme</h2>
-              <div v-for='edge in Object.keys(edges)' :key='edge'>
-                <span class='option'>{{edge}}: </span><input v-model='edges[edge]' :prefix='edge + ":"' style='border-style: groove; width: 30px;'/>
-              </div>
-            </v-flex>
-            <v-flex xs3>
-              <h2>Color Scheme</h2>
-              <div v-for='color in Object.keys(colors)' :key='color'>
-                <span class='option'>{{color}}: </span><input v-model='colors[color]' :prefix='color + ":"' style='border-style: groove; width: 60px;'/>
-              </div>
-            </v-flex>
-          </v-layout>
-          <v-btn color='blue' dark @click='saveSettings'>Save Settings</v-btn>
-        </v-container>
-      </v-bottom-sheet>
-      <v-layout row wrap>
-        <v-flex xs12 md5>
-          <v-layout row>
-            <div :style='{background: stickerBG[0]}' class='sticker-box'></div>
-            <div :style='{background: stickerBG[1]}' class='sticker-box'></div>
-          </v-layout>
-          <v-layout row>
-            <div :style='{display: testCorners ? "inline" : "none", background: stickerBG[2]}' class='sticker-box'></div>
-            <input class='mobile-input' ref='mobile-input' placeholder="click me" @input='mobileInputUpdate'/>
-          </v-layout>
-          <v-layout v-if='correctAnswer !== ""' column>
-            <div v-if='correctAnswer === selectedAnswer'><h1 style='color: green'>Correct!</h1></div>
-            <div v-else>
-              <h1 style='color: red'>Incorrect</h1>
-              <h1>You chose: {{selectedAnswer}}, Correct Answer: {{correctAnswer}} </h1>
-            </div>
-            <div><h1>Time taken: {{formatTime(timeTaken)}}</h1></div>
-            <div><h1>Avg: {{formatTime(average(correctTimes))}}</h1></div>
-            <div><h1>Std. Dev.: {{formatTime(standardDeviation(correctTimes))}}</h1></div>
-          </v-layout>
-        </v-flex>
-        <v-flex xs12 md7>
-          <v-layout row :class="{'mt-5': $vuetify.breakpoint.smAndDown, 'ma-0': $vuetify.breakpoint.mdAndUp}">
-            <v-data-table :items-per-page='30' :headers='[{text: "#", sortable: false}, {text: "Time", sortable: false}, {text: "Delete?", sortable: false}]'  :items='times' class='elevation-1'>
-              <template v-slot:item='props'>
-                <tr :key='props.index' :class="{'correct-answer': props.item.correct, 'incorrect-answer': !props.item.correct}">
-                  <td>{{ times.length - props.index }}</td>
-                  <td class='text-xs-right'>{{ formatTime(props.item.time) }}</td>
-                  <td class='text-xs-right' @click='deleteTime(props.index)()'>x</td>
-                </tr>
-              </template>
-            </v-data-table>
-          </v-layout>
-        </v-flex>
-      </v-layout>
-    </v-container>
-  </div>
-</template>
+<script setup>
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { readStorage, writeStorage } from '../utils/storage'
 
-<script>
-import VueKofi from 'vue-kofi'
-Number.prototype.pad = function(size) {
-    var s = String(this);
-    while (s.length < (size || 2)) {s = "0" + s;}
-    return s;
+const DEFAULT_COLORS = {
+  U: 'white',
+  L: 'orange',
+  F: 'green',
+  R: 'red',
+  B: 'blue',
+  D: 'yellow',
 }
 
-export default {
-  name: 'BLDTrainer3',
-  components: {
-    VueKofi,
-  },
-  data: () => ({
-    colors: {
-      'U': 'white',
-      'L': 'orange',
-      'F': 'green',
-      'R': 'red',
-      'B': 'blue',
-      'D': 'yellow'
-    },
-    corners: {
-      'UBL': 'A',
-      'URB': 'B',
-      'UFR': 'C',
-      'ULF': 'D',
-      'LUB': 'E',
-      'LFU': 'F',
-      'LDF': 'G',
-      'LBD': 'H',
-      'FUL': 'I',
-      'FRU': 'J',
-      'FDR': 'K',
-      'FLD': 'L',
-      'RUF': 'M',
-      'RBU': 'N',
-      'RDB': 'O',
-      'RFD': 'P',
-      'BUR': 'Q',
-      'BLU': 'R',
-      'BDL': 'S',
-      'BRD': 'T',
-      'DFL': 'U',
-      'DRF': 'V',
-      'DBR': 'W',
-      'DLB': 'X'
-    },
-    edges: {
-      'UB': 'A',
-      'UR': 'B',
-      'UF': 'C',
-      'UL': 'D',
-      'LU': 'E',
-      'LF': 'F',
-      'LD': 'G',
-      'LB': 'H',
-      'FU': 'I',
-      'FR': 'J',
-      'FD': 'K',
-      'FL': 'L',
-      'RU': 'M',
-      'RB': 'N',
-      'RD': 'O',
-      'RF': 'P',
-      'BU': 'Q',
-      'BL': 'R',
-      'BD': 'S',
-      'BR': 'T',
-      'DF': 'U',
-      'DR': 'V',
-      'DB': 'W',
-      'DL': 'X'
-    },
-    radioGroup: 1,
+const DEFAULT_CORNERS = {
+  UBL: 'A', URB: 'B', UFR: 'C', ULF: 'D',
+  LUB: 'E', LFU: 'F', LDF: 'G', LBD: 'H',
+  FUL: 'I', FRU: 'J', FDR: 'K', FLD: 'L',
+  RUF: 'M', RBU: 'N', RDB: 'O', RFD: 'P',
+  BUR: 'Q', BLU: 'R', BDL: 'S', BRD: 'T',
+  DFL: 'U', DRF: 'V', DBR: 'W', DLB: 'X',
+}
 
-    selection: '',
-    stickerBG: ['red', 'blue', 'white'],
+const DEFAULT_EDGES = {
+  UB: 'A', UR: 'B', UF: 'C', UL: 'D',
+  LU: 'E', LF: 'F', LD: 'G', LB: 'H',
+  FU: 'I', FR: 'J', FD: 'K', FL: 'L',
+  RU: 'M', RB: 'N', RD: 'O', RF: 'P',
+  BU: 'Q', BL: 'R', BD: 'S', BR: 'T',
+  DF: 'U', DR: 'V', DB: 'W', DL: 'X',
+}
 
-    correctAnswer: '',
-    selectedAnswer: '',
-    realTimeStart: 0,
-    timeTaken: 0,
-    times: [],
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWX'.split('')
+const savedSettings = readStorage('3BLD-trainer-settings', {}) ?? {}
+const colors = ref({ ...DEFAULT_COLORS, ...(savedSettings.colors ?? {}) })
+const corners = ref({ ...DEFAULT_CORNERS, ...(savedSettings.corners ?? {}) })
+const edges = ref({ ...DEFAULT_EDGES, ...(savedSettings.edges ?? {}) })
+const memoType = ref(savedSettings.testing === 2 ? 2 : 1)
+const times = ref(readStorage('3BLD-trainer-times', []))
+const selection = ref('')
+const startedAt = ref(0)
+const result = ref(null)
+const settingsOpen = ref(false)
+const settingsDraft = ref({
+  colors: { ...colors.value },
+  corners: { ...corners.value },
+  edges: { ...edges.value },
+  memoType: memoType.value,
+})
 
-    debouncer: false, // prevent multiple keypressed or keypressed during interval from checking
+if (!Array.isArray(times.value)) times.value = []
 
-    // styling
-    dialog: false,
-  }),
-  methods: {
-    next () {
-      this.debouncer = false
+let nextTimeout = null
 
-      let keys = Object.keys(this.testCorners ? this.corners : this.edges)
+const isCornerMode = computed(() => memoType.value === 1)
+const memoMap = computed(() => (isCornerMode.value ? corners.value : edges.value))
+const stickers = computed(() => selection.value.split('').map((face) => ({
+  face,
+  color: colors.value[face] || '#f4f4f4',
+})))
+const correctTimes = computed(() => times.value.filter((entry) => entry.correct).map((entry) => entry.time))
+const averageTime = computed(() => average(correctTimes.value))
+const deviation = computed(() => standardDeviation(correctTimes.value))
+const accuracy = computed(() => (
+  times.value.length ? Math.round((correctTimes.value.length / times.value.length) * 100) : 0
+))
 
-      // don't allow same selection twice in a row because this looks like UI is lagging
-      let oldSelection = this.selection
-      while (oldSelection === this.selection) {
-        this.selection = keys[Math.floor(Math.random() * keys.length)]
-      }
+function average(values) {
+  if (!values.length) return Number.NaN
+  return values.reduce((sum, value) => sum + value, 0) / values.length
+}
 
-      // convert selection into configured sticker colors
-      for (let i=0; i<this.selection.length; i++) {
-        this.stickerBG[i] = this.colors[this.selection[i]]
-      }
-      this.$forceUpdate()
-      this.realTimeStart = window.performance.now()
-    },
-    checkKey (key) {
-      this.correctAnswer = (this.testCorners ? this.corners : this.edges)[this.selection].toUpperCase()
-      this.selectedAnswer = key.toUpperCase()
-      this.timeTaken = window.performance.now() - this.realTimeStart
-      return this.selectedAnswer === this.correctAnswer
-    },
+function standardDeviation(values) {
+  if (!values.length) return Number.NaN
+  const mean = average(values)
+  const variance = average(values.map((value) => (value - mean) ** 2))
+  return Math.sqrt(variance)
+}
 
-    eventHandler (event) {
-      if (this.debouncer || this.dialog || event.type !== 'keydown' || event.key.length > 1) return
-      this.debouncer = true
-      this.checkKey(event.key)
-      setTimeout(this.next, 1000)
-    },
-    mobileInputUpdate (event) {
-      this.$refs['mobile-input'].value = ''
-      this.eventHandler({type: 'keydown', key: event.data})
-    },
+function formatTime(milliseconds) {
+  if (!Number.isFinite(milliseconds)) return '—'
+  const total = Math.max(0, Math.floor(milliseconds))
+  const fraction = String(total % 1000).padStart(3, '0')
+  const seconds = Math.floor(total / 1000)
 
-    formatTime (time) {
-      let date = new Date(time)
-      if (time < 60000) return date.getSeconds() + '.' + date.getMilliseconds().pad(3) + 's'
-      else if (time < 3600000) return date.getMinutes() + ':' + date.getSeconds().pad(2) + '.' + date.getMilliseconds().pad(3)
-      else if (time < 86400000) return date.getHours() + ':' + date.getMinutes().pad(2) + ':' + date.getSeconds().pad(2) + '.' + date.getMilliseconds().pad(3)
-      else return 'dude. that way seriously way too long I lost track of time'
-    },
+  if (seconds < 60) return `${seconds}.${fraction}s`
+  const minutes = Math.floor(seconds / 60)
+  const remainder = String(seconds % 60).padStart(2, '0')
+  if (minutes < 60) return `${minutes}:${remainder}.${fraction}`
+  return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, '0')}:${remainder}.${fraction}`
+}
 
-    deleteTime (i) {
-      let self = this
-      return function () {
-        self.times.splice(i, 1)
-        localStorage.setItem('3BLD-trainer-times', JSON.stringify(self.times))
-      }
-    },
+function saveTimes() {
+  writeStorage('3BLD-trainer-times', times.value)
+}
 
-    // stats
-    standardDeviation (values){
-      var avg = this.average(values);
-      var squareDiffs = values.map(function (value){
-        var diff = value - avg;
-        var sqrDiff = diff * diff;
-        return sqrDiff;
-      });
-      var avgSquareDiff = this.average(squareDiffs);
-      var stdDev = Math.sqrt(avgSquareDiff);
-      return stdDev;
-    },
-    average (data){
-      var sum = data.reduce(function (sum, value){
-        return sum + value;
-      }, 0);
-      var avg = sum / data.length;
-      return avg;
-    },
-    saveSettings() {
-      localStorage.setItem('3BLD-trainer-settings', JSON.stringify({
-        colors: this.colors,
-        corners: this.corners,
-        edges: this.edges,
-        testing: this.radioGroup,
-      }))
-      this.dialog = false
-    }
-  },
-  mounted: function () {
-    let times = JSON.parse(localStorage.getItem('3BLD-trainer-times'))
-    if (times) {
-      this.times = times
-    }
-    let settings = JSON.parse(localStorage.getItem('3BLD-trainer-settings'))
-    if (settings) {
-      this.colors = settings.colors
-      this.corners = settings.corners
-      this.edges = settings.edges
-      this.radioGroup = settings.testing
-    }
-    this.next()
-    document.addEventListener('keydown', this.eventHandler)
-  },
-  watch: {
-    timeTaken () {
-      this.times.unshift({
-        time: this.timeTaken,
-        correct: this.correctAnswer === this.selectedAnswer,
-        selection: this.selection,
-        selectedAnswer: this.selectedAnswer,
-        correctAnswer: this.correctAnswer,
-      })
-      localStorage.setItem('3BLD-trainer-times', JSON.stringify(this.times))
-    }
-  },
-  computed: {
-    correctTimes () {
-      return this.times.filter(time => time.correct).map(time => time.time)
-    },
-    testCorners () {
-      return this.radioGroup === 1
-    }
+function nextMemo() {
+  if (nextTimeout) clearTimeout(nextTimeout)
+  nextTimeout = null
+  result.value = null
+
+  const keys = Object.keys(memoMap.value)
+  if (!keys.length) return
+
+  const candidates = keys.filter((key) => key !== selection.value)
+  selection.value = candidates[Math.floor(Math.random() * candidates.length)] || keys[0]
+  startedAt.value = performance.now()
+}
+
+function answerLetter(letter) {
+  if (settingsOpen.value || result.value || !selection.value) return
+
+  const expected = String(memoMap.value[selection.value] ?? '').trim().slice(0, 1).toUpperCase()
+  const selectedAnswer = String(letter).trim().slice(0, 1).toUpperCase()
+  const timeTaken = performance.now() - startedAt.value
+  const attempt = {
+    time: timeTaken,
+    correct: selectedAnswer === expected,
+    selection: selection.value,
+    selectedAnswer,
+    correctAnswer: expected,
   }
+
+  result.value = attempt
+  times.value = [attempt, ...times.value]
+  saveTimes()
+  nextTimeout = setTimeout(nextMemo, 900)
 }
+
+function handleKeydown(event) {
+  if (
+    event.defaultPrevented ||
+    settingsOpen.value ||
+    event.key.length !== 1 ||
+    event.target?.closest?.('input, textarea, select, [contenteditable="true"]')
+  ) return
+
+  if (!/^[a-z]$/i.test(event.key)) return
+  event.preventDefault()
+  answerLetter(event.key)
+}
+
+function openSettings() {
+  settingsDraft.value = {
+    colors: { ...colors.value },
+    corners: { ...corners.value },
+    edges: { ...edges.value },
+    memoType: memoType.value,
+  }
+  settingsOpen.value = true
+}
+
+function closeSettings() {
+  settingsOpen.value = false
+}
+
+function saveSettings() {
+  memoType.value = Number(settingsDraft.value.memoType) === 2 ? 2 : 1
+  colors.value = { ...DEFAULT_COLORS, ...settingsDraft.value.colors }
+  corners.value = { ...DEFAULT_CORNERS, ...settingsDraft.value.corners }
+  edges.value = { ...DEFAULT_EDGES, ...settingsDraft.value.edges }
+  writeStorage('3BLD-trainer-settings', {
+    colors: colors.value,
+    corners: corners.value,
+    edges: edges.value,
+    testing: memoType.value,
+  })
+  settingsOpen.value = false
+  nextMemo()
+}
+
+function deleteTime(index) {
+  times.value = times.value.filter((_entry, entryIndex) => entryIndex !== index)
+  saveTimes()
+}
+
+function clearHistory() {
+  if (!times.value.length || !window.confirm('Delete all 3BLD training attempts?')) return
+  times.value = []
+  saveTimes()
+}
+
+onMounted(() => {
+  nextMemo()
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
+  if (nextTimeout) clearTimeout(nextTimeout)
+})
 </script>
 
-<style scoped>
-h1,h2,h3 {
-  font-family: 'Monument', Verdana, sans-serif !important;
-}
+<template>
+  <div>
+    <header class="page-heading">
+      <div class="page-heading-copy">
+        <span class="eyebrow">Blindfold practice · 3×3</span>
+        <h1>3BLD memo trainer</h1>
+        <p>
+          Build recognition speed with corner and edge letter schemes. Answer with your keyboard or
+          tap a letter below; your attempts are saved locally.
+        </p>
+      </div>
+      <div class="page-heading-actions">
+        <button class="button" @click="openSettings"><span aria-hidden="true">⚙</span> Settings</button>
+        <button class="button button-primary" @click="nextMemo"><span aria-hidden="true">↻</span> New memo</button>
+      </div>
+    </header>
 
-span.option {
-  font-family: "Lucida Console", Monaco, monospace !important;
-}
+    <div class="bld-layout">
+      <section class="bld-practice">
+        <article class="panel memo-card">
+          <div class="memo-target-heading">
+            <div>
+              <span class="eyebrow">Identify this piece</span>
+              <h2 class="section-title">{{ isCornerMode ? 'Corner' : 'Edge' }} memo</h2>
+              <p class="memo-target-code">{{ selection || '—' }}</p>
+            </div>
+            <span class="status-pill" :class="result ? (result.correct ? 'status-live' : 'status-ready') : 'status-ready'">
+              <span class="status-dot"></span>
+              {{ result ? (result.correct ? 'Correct' : 'Try again next') : 'Your turn' }}
+            </span>
+          </div>
 
-.bottomsheet {
-  background: white;
-  overflow-y: auto;
-  max-height: 90vh;
-}
+          <div class="sticker-cluster" :aria-label="`Sticker colors for ${selection}`">
+            <div v-for="sticker in stickers" :key="sticker.face" class="sticker-face">
+              <span>{{ sticker.face }}</span>
+              <div class="sticker" :style="{ backgroundColor: sticker.color }"></div>
+            </div>
+          </div>
 
-.sticker-box {
-  height: 100px !important;
-  width: 100px !important;
-  margin: 5px;
-  background: white;
-  border: thick solid black;
-}
-.bldtrainer3 {
-  background: #eeeeee;
-  height: 100%;
-  min-height: 100vh;
-}
+          <div class="answer-display">
+            <span>Letter for this piece</span>
+            <strong>{{ result?.selectedAnswer || '·' }}</strong>
+          </div>
+          <p
+            v-if="result"
+            class="answer-feedback"
+            :class="result.correct ? 'correct' : 'incorrect'"
+          >
+            {{ result.correct ? 'Nice recognition.' : `The correct letter was ${result.correctAnswer}.` }}
+            <span class="muted"> · {{ formatTime(result.time) }}</span>
+          </p>
+          <p v-else class="field-help" style="margin: 13px 0 0">
+            Press a letter key, or choose from the letter pad. The next piece appears automatically.
+          </p>
 
-.correct-answer {
-  background: #7CFC00;
-}
-.incorrect-answer {
-  background: #F08080;
-}
+          <div class="letter-pad" aria-label="Answer letters">
+            <button
+              v-for="letter in LETTERS"
+              :key="letter"
+              class="letter-key"
+              :disabled="Boolean(result)"
+              @click="answerLetter(letter)"
+            >
+              {{ letter }}
+            </button>
+          </div>
 
-.mobile-input {
-  display: none;
-}
-@media only screen and (max-width: 1000px) {
-  .mobile-input {
-    display: inline;
-  }
-}
-</style>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-label">Correct avg</span>
+              <span class="stat-value">{{ formatTime(averageTime) }}</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Std. deviation</span>
+              <span class="stat-value">{{ formatTime(deviation) }}</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Accuracy</span>
+              <span class="stat-value">{{ times.length ? `${accuracy}%` : '—' }}</span>
+            </div>
+          </div>
+        </article>
+
+        <div class="field-help" style="padding: 0 5px">
+          Current scheme: {{ isCornerMode ? 'corners' : 'edges' }} · {{ times.length }} attempts saved on this device.
+        </div>
+      </section>
+
+      <section class="panel panel-pad">
+        <div class="section-heading">
+          <div>
+            <h2 class="section-title">Attempt history</h2>
+            <p class="section-subtitle">Newest first · correct answers are highlighted</p>
+          </div>
+          <button class="button button-small button-danger" :disabled="!times.length" @click="clearHistory">
+            Clear history
+          </button>
+        </div>
+
+        <div v-if="times.length" class="attempt-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Piece</th>
+                <th>Answer</th>
+                <th>Time</th>
+                <th>Result</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(attempt, index) in times" :key="`${attempt.time}-${index}`">
+                <td class="numeric">{{ times.length - index }}</td>
+                <td class="mono">{{ attempt.selection }}</td>
+                <td class="mono">{{ attempt.selectedAnswer }}</td>
+                <td class="numeric">{{ formatTime(attempt.time) }}</td>
+                <td>
+                  <span class="result-tag" :class="{ incorrect: !attempt.correct }">
+                    {{ attempt.correct ? 'Correct' : 'Miss' }}
+                  </span>
+                </td>
+                <td>
+                  <button class="delete-row" :aria-label="`Delete attempt ${index + 1}`" @click="deleteTime(index)">
+                    ×
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-else class="median-empty">
+          <strong>No attempts yet</strong>
+          <span>Your recognition times will appear here.</span>
+        </div>
+      </section>
+    </div>
+
+    <Teleport to="body">
+      <div v-if="settingsOpen" class="dialog-backdrop" @click.self="closeSettings">
+        <section class="dialog-card dialog-card-wide" role="dialog" aria-modal="true" aria-labelledby="bld-settings-title">
+          <header class="dialog-header">
+            <div>
+              <span class="eyebrow">Personalize your practice</span>
+              <h2 id="bld-settings-title" class="dialog-title">Memo settings</h2>
+            </div>
+            <button class="button button-icon" aria-label="Close settings" @click="closeSettings">×</button>
+          </header>
+
+          <form @submit.prevent="saveSettings">
+            <div class="dialog-body">
+              <label class="field" style="max-width: 300px">
+                <span class="field-label">Memo type</span>
+                <select v-model.number="settingsDraft.memoType" class="select">
+                  <option :value="1">Corners</option>
+                  <option :value="2">Edges</option>
+                </select>
+              </label>
+
+              <div class="scheme-grid">
+                <section>
+                  <div class="section-heading">
+                    <div>
+                      <h3 class="section-title">Corner letter scheme</h3>
+                      <p class="section-subtitle">Set the letter for each corner position.</p>
+                    </div>
+                  </div>
+                  <div class="scheme-list">
+                    <label v-for="position in Object.keys(settingsDraft.corners)" :key="position" class="scheme-input-row">
+                      <code>{{ position }}</code>
+                      <input v-model="settingsDraft.corners[position]" maxlength="1" :aria-label="`Corner ${position} letter`" />
+                    </label>
+                  </div>
+                </section>
+
+                <section>
+                  <div class="section-heading">
+                    <div>
+                      <h3 class="section-title">Edge letter scheme</h3>
+                      <p class="section-subtitle">Set the letter for each edge position.</p>
+                    </div>
+                  </div>
+                  <div class="scheme-list">
+                    <label v-for="position in Object.keys(settingsDraft.edges)" :key="position" class="scheme-input-row">
+                      <code>{{ position }}</code>
+                      <input v-model="settingsDraft.edges[position]" maxlength="1" :aria-label="`Edge ${position} letter`" />
+                    </label>
+                  </div>
+                </section>
+              </div>
+
+              <section>
+                <div class="section-heading">
+                  <div>
+                    <h3 class="section-title">Sticker colors</h3>
+                    <p class="section-subtitle">Use any valid CSS color name or hex value.</p>
+                  </div>
+                </div>
+                <div class="scheme-list" style="grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 520px">
+                  <label v-for="face in Object.keys(settingsDraft.colors)" :key="face" class="scheme-input-row">
+                    <code>{{ face }}</code>
+                    <input v-model="settingsDraft.colors[face]" style="width: 72px" :aria-label="`${face} face color`" />
+                  </label>
+                </div>
+              </section>
+            </div>
+
+            <footer class="dialog-footer">
+              <button class="button" type="button" @click="closeSettings">Cancel</button>
+              <button class="button button-primary" type="submit">Save settings</button>
+            </footer>
+          </form>
+        </section>
+      </div>
+    </Teleport>
+  </div>
+</template>

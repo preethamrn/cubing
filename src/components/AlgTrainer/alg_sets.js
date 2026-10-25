@@ -1,12 +1,40 @@
-import { EquivalentTransformations } from "cubing/kpuzzle"
+function patternOrbit(pattern, orbitName) {
+  const data = pattern?.patternData ?? pattern
+  const orbit = data?.[orbitName]
+
+  if (!orbit) return null
+
+  return {
+    permutation: orbit.permutation ?? orbit.pieces,
+    orientation: orbit.orientation,
+  }
+}
+
+function EquivalentTransformations(_kpuzzle, t1, t2) {
+  if (typeof t1?.isIdentical === 'function') return t1.isIdentical(t2)
+
+  const first = t1?.patternData ?? t1
+  const second = t2?.patternData ?? t2
+  if (!first || !second) return false
+  const orbits = Object.keys(first ?? {})
+
+  return orbits.every((orbitName) => {
+    const a = patternOrbit(first, orbitName)
+    const b = patternOrbit(second, orbitName)
+    return a && b &&
+      a.permutation.every((value, index) => value === b.permutation[index]) &&
+      a.orientation.every((value, index) => value === b.orientation[index])
+  })
+}
 
 // def = defition of which pieces to check
 function KPuzzleEquivalentChecker(def, t1, t2) {
   const orbits = Object.keys(def) // list of orbits
   for (let i=0; i < orbits.length; i++) {
     let {permutation, orientation} = def[orbits[i]]
-    const o1 = t1[orbits[i]]
-    const o2 = t2[orbits[i]]
+    const o1 = patternOrbit(t1, orbits[i])
+    const o2 = patternOrbit(t2, orbits[i])
+    if (!o1 || !o2) return false
     // permutation check
     for (let j=0; j < permutation.length; j++) {
       if (permutation[j] === 1 && o1.permutation[j] !== o2.permutation[j]) return false
