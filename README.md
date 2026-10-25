@@ -30,3 +30,13 @@ npm run preview
 
 The production build is written to `dist/`. The existing `deploy.sh` publishes that directory to the
 `gh-pages` branch.
+
+### Browser regression tests
+
+These verify the actual cube canvas on desktop and mobile, including case changes and resets:
+
+```sh
+npx playwright install --with-deps chromium
+npm run build
+npm run test:e2e
+```

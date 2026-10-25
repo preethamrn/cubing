@@ -11,8 +11,10 @@ import {
   algPartToString,
   analyzeAlgProgress,
   buildProcessedAlg,
+  normalizeMove,
 } from '../utils/algProgress'
 import { readStorage, removeStorage, shuffle, writeStorage } from '../utils/storage'
+import { cubeConnectionError, releaseCube, watchCubeConnection } from '../utils/cubeConnection'
 
 const DEFAULT_SETTINGS = {
   algSet: 'PLL',
@@ -76,7 +78,9 @@ const solvedPattern = shallowRef(null)
 const initialPattern = shallowRef(null)
 const currentPattern = shallowRef(null)
 const processedAlg = shallowRef([])
-const observedMoves = ref([])
+// cubing.js uses native private fields, which cannot be accessed through Vue
+// proxies. Replace the array to notify Vue without proxying the Move instances.
+const observedMoves = shallowRef([])
 const progress = shallowRef({
   correct: [],
   incorrect: new Alg(),
@@ -113,6 +117,9 @@ const customSelectionChanged = ref(false)
 
 let timerInterval = null
 let nextCaseTimeout = null
+let cleanupCubeConnection = null
+let connectionAttempt = 0
+let unmounted = false
 
 const caseCount = computed(() => currentItems.value.length)
 const isTimerRunning = computed(() => timerStartedAt.value !== null)
@@ -209,11 +216,16 @@ function clearNextCaseTimeout() {
 function renderTwistyPlayer(alg) {
   if (!twistyHost.value) return
 
+  twistyPlayer.value?.remove()
+  twistyPlayer.value = null
+  twistyHost.value.replaceChildren()
+
   try {
     loadingError.value = ''
     const player = new TwistyPlayer({
       puzzle: '3x3x3',
       alg,
+      visualization: '3D',
       background: 'none',
       controlPanel: 'none',
       viewerLink: 'none',
@@ -222,7 +234,15 @@ function renderTwistyPlayer(alg) {
     player.style.height = '100%'
     twistyHost.value.replaceChildren(player)
     twistyPlayer.value = player
-    player.jumpToEnd({ flash: false })
+    requestAnimationFrame(() => {
+      if (player.isConnected && twistyPlayer.value === player) {
+        try {
+          player.jumpToEnd({ flash: false })
+        } catch (error) {
+          loadingError.value = `The cube preview could not be positioned: ${error.message}`
+        }
+      }
+    })
   } catch (error) {
     loadingError.value = `The cube preview could not be created: ${error.message}`
   }
@@ -236,8 +256,10 @@ function prepareCase(item) {
   trainingPhase.value = 'solving'
   observedMoves.value = []
   try {
+    const inverseAlg = new Alg(item.alg).invert().toString()
     processedAlg.value = buildProcessedAlg(item.alg)
-    initialPattern.value = solvedPattern.value.applyAlg(new Alg(item.alg).invert())
+    initialPattern.value = solvedPattern.value.applyAlg(inverseAlg)
+    renderTwistyPlayer(inverseAlg)
   } catch (error) {
     trainingPhase.value = 'ready'
     errorMessage.value = `Could not load ${item.name}: ${error.message}`
@@ -247,8 +269,6 @@ function prepareCase(item) {
   }
   currentPattern.value = initialPattern.value
   progress.value = analyzeAlgProgress(initialPattern.value, processedAlg.value, [])
-
-  renderTwistyPlayer(new Alg(item.alg).invert())
 }
 
 function startNextCase() {
@@ -269,6 +289,7 @@ function startNextCase() {
     }
     if (twistyHost.value) twistyHost.value.replaceChildren()
     twistyPlayer.value = null
+    renderTwistyPlayer('')
     return
   }
 
@@ -342,24 +363,29 @@ function scheduleNextCase() {
 }
 
 function receiveMove(event) {
-  const move = event?.latestAlgLeaf
-  if (!(move instanceof Move)) return
+  // Copy only the move and timestamp, not Bluetooth's device/pattern objects.
+  const move = normalizeMove(event?.latestAlgLeaf)
+  if (!move) return
+  const normalizedEvent = {
+    latestAlgLeaf: move,
+    timeStamp: Number.isFinite(event?.timeStamp) ? event.timeStamp : performance.now(),
+  }
 
   try {
     if (trainingPhase.value === 'between') {
-      currentPattern.value = currentPattern.value.applyAlg(new Alg([move]))
-      twistyPlayer.value?.experimentalAddMove(move)
+      currentPattern.value = currentPattern.value.applyAlg(move.toString())
+      twistyPlayer.value?.experimentalAddMove(move.toString())
       if (isTargetSolved(currentPattern.value)) scheduleNextCase()
       else clearNextCaseTimeout()
       return
     }
 
     if (trainingPhase.value !== 'solving' || !currentItem.value) return
-    startTimer(event)
-    currentPattern.value = currentPattern.value.applyAlg(new Alg([move]))
-    observedMoves.value = [...observedMoves.value, event]
+    startTimer(normalizedEvent)
+    currentPattern.value = currentPattern.value.applyAlg(move.toString())
+    observedMoves.value = [...observedMoves.value, normalizedEvent]
     progress.value = analyzeAlgProgress(initialPattern.value, processedAlg.value, observedMoves.value)
-    twistyPlayer.value?.experimentalAddMove(move)
+    twistyPlayer.value?.experimentalAddMove(move.toString())
 
     if (isTargetSolved(currentPattern.value)) {
       progress.value = {
@@ -371,7 +397,7 @@ function receiveMove(event) {
         completedMoves: progress.value.totalMoves,
         pattern: currentPattern.value,
       }
-      stopTimer(event)
+      stopTimer(normalizedEvent)
       trainingPhase.value = 'between'
       scheduleNextCase()
     }
@@ -390,26 +416,40 @@ async function connectCube() {
   }
 
   connectionStatus.value = 'connecting'
+  const attempt = ++connectionAttempt
   try {
     const device = await connectSmartPuzzle({ acceptAllDevices: false })
+    if (unmounted || attempt !== connectionAttempt) {
+      releaseCube(device)
+      return
+    }
     connection.value = device
     connectionName.value = device.name() || 'Smart cube'
-    device.addAlgLeafListener(receiveMove)
     connectionStatus.value = 'connected'
+    cleanupCubeConnection = watchCubeConnection(device, receiveMove, () => {
+      connection.value = null
+      connectionName.value = ''
+      connectionStatus.value = 'disconnected'
+      clearNextCaseTimeout()
+      if (timerInterval) clearInterval(timerInterval)
+      timerInterval = null
+      timerStartedAt.value = null
+      cubeTimerStartedAt.value = null
+      errorMessage.value = 'The cube disconnected. Wake it up and reconnect, then reset the case before continuing; moves made while disconnected cannot be recovered.'
+    })
   } catch (error) {
+    if (unmounted || attempt !== connectionAttempt) return
+    disconnectCube()
     connectionStatus.value = 'disconnected'
-    if (error.name !== 'NotFoundError') {
-      errorMessage.value = error.message || 'Could not connect to the smart cube.'
-    }
+    errorMessage.value = cubeConnectionError(error)
   }
 }
 
 function disconnectCube() {
-  try {
-    connection.value?.disconnect()
-  } catch {
-    // The cube may already have disconnected from Bluetooth.
-  }
+  connectionAttempt += 1
+  cleanupCubeConnection?.()
+  cleanupCubeConnection = null
+  if (connection.value) releaseCube(connection.value)
   connection.value = null
   connectionName.value = ''
   connectionStatus.value = 'disconnected'
@@ -557,8 +597,8 @@ function saveEditedAlgorithm() {
       throw new Error('Use standard face turns, wide turns, slices, or cube rotations.')
     }
 
-    const start = solvedPattern.value.applyAlg(new Alg(currentItem.value.alg).invert())
-    const result = start.applyAlg(candidate)
+    const start = solvedPattern.value.applyAlg(new Alg(currentItem.value.alg).invert().toString())
+    const result = start.applyAlg(candidate.toString())
     if (!isTargetSolved(result) && !window.confirm('This does not appear to solve the case. Save it anyway?')) return
   } catch (error) {
     editError.value = error.message || 'That algorithm could not be parsed.'
@@ -593,6 +633,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  unmounted = true
   window.removeEventListener('keydown', handleKeyboardMove)
   clearNextCaseTimeout()
   resetTimer()
@@ -741,8 +782,8 @@ onBeforeUnmount(() => {
             <div v-if="!cubingReady" class="cube-placeholder">
               <span class="mono">Loading cube…</span>
             </div>
-            <div v-else-if="!currentItem" class="cube-placeholder">
-              <span class="mono">Select a case to begin</span>
+            <div v-else-if="!twistyPlayer" class="cube-placeholder">
+              <span class="mono">{{ currentItem ? 'Preview unavailable' : 'Select a case to begin' }}</span>
             </div>
           </div>
           <div class="cube-caption">

@@ -2,8 +2,36 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { Alg, Move } from 'cubing/alg'
 import { cube3x3x3 } from 'cubing/puzzles'
+import { isProxy, shallowRef } from 'vue'
 import { ALG_SETS } from '../src/components/AlgTrainer/alg_sets.js'
-import { analyzeAlgProgress, buildProcessedAlg } from '../src/utils/algProgress.js'
+import { analyzeAlgProgress, buildProcessedAlg, normalizeMove } from '../src/utils/algProgress.js'
+
+test('normalizes incoming moves by notation', () => {
+  const normalized = normalizeMove(new Move("R'"))
+
+  assert.ok(normalized instanceof Move)
+  assert.equal(normalized.toString(), "R'")
+  assert.equal(normalizeMove({ toString: () => 'U2' }).toString(), 'U2')
+  assert.equal(normalizeMove({ toString: () => 'not a move' }), null)
+})
+
+test('move history stays unproxied across multiple reactive updates', async () => {
+  const kpuzzle = await cube3x3x3.kpuzzle()
+  const solved = kpuzzle.defaultPattern()
+  const alg = new Alg("R U R'")
+  const initialPattern = solved.applyAlg(alg.invert().toString())
+  const processed = buildProcessedAlg(alg.toString())
+  const history = shallowRef([])
+
+  for (const move of alg.experimentalLeafMoves()) {
+    history.value = [...history.value, { latestAlgLeaf: normalizeMove(move), timeStamp: 1 }]
+    assert.equal(isProxy(history.value.at(-1).latestAlgLeaf), false)
+    const result = analyzeAlgProgress(initialPattern, processed, history.value)
+    assert.equal(result.completedMoves, history.value.length)
+  }
+
+  assert.equal(analyzeAlgProgress(initialPattern, processed, history.value).pattern.isIdentical(solved), true)
+})
 
 test('all built-in algorithms solve their case and progress cleanly', async () => {
   const kpuzzle = await cube3x3x3.kpuzzle()

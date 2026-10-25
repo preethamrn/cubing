@@ -1,5 +1,15 @@
 import { Alg, Move } from 'cubing/alg'
 
+export function normalizeMove(input) {
+  try {
+    const notation = typeof input === 'string' ? input : input?.toString?.()
+    if (!notation) return null
+    return new Move(notation)
+  } catch {
+    return null
+  }
+}
+
 function mergeMappings(currentMapping, newMapping) {
   const merged = {}
 
@@ -110,7 +120,7 @@ export function analyzeAlgProgress(initialPattern, processedAlg, events) {
     inputMoves.every((move, index) => move instanceof Move && move.isIdentical(expectedMoves[index]))
 
   if (followsTargetPrefix) {
-    const pattern = initialPattern.applyAlg(new Alg(inputMoves))
+    const pattern = initialPattern.applyAlg(new Alg(inputMoves).toString())
     return {
       correct: expectedMoves.slice(0, inputMoves.length),
       incorrect: new Alg(),
@@ -143,7 +153,7 @@ export function analyzeAlgProgress(initialPattern, processedAlg, events) {
       ? new Move(mappedFamily, inputMove.amount)
       : inputMove
 
-    puzzlePattern = puzzlePattern.applyAlg(new Alg([actualMove]))
+    puzzlePattern = puzzlePattern.applyAlg(actualMove.toString())
     movesToExecute.push({ latestMove: actualMove, timeStamp: event.timeStamp })
 
     let unconsumedMove = actualMove
@@ -153,12 +163,12 @@ export function analyzeAlgProgress(initialPattern, processedAlg, events) {
         ? new Alg([step.move, new Move(step.rotation.family, -step.rotation.amount)])
         : new Alg([step.move])
 
-      scramblePattern = scramblePattern.applyAlg(expectedStep)
+      scramblePattern = scramblePattern.applyAlg(expectedStep.toString())
 
       if (puzzlePattern.isIdentical(scramblePattern)) {
         if (step.rotation) {
-          scramblePattern = scramblePattern.applyAlg(step.rotation)
-          puzzlePattern = puzzlePattern.applyAlg(step.rotation)
+          scramblePattern = scramblePattern.applyAlg(step.rotation.toString())
+          puzzlePattern = puzzlePattern.applyAlg(step.rotation.toString())
           movesToExecute.push({ latestMove: step.rotation, timeStamp: event.timeStamp })
         }
 
@@ -167,7 +177,7 @@ export function analyzeAlgProgress(initialPattern, processedAlg, events) {
         scrambleIndex += 1
         unconsumedMove = null
       } else {
-        scramblePattern = scramblePattern.applyAlg(expectedStep.invert())
+        scramblePattern = scramblePattern.applyAlg(expectedStep.invert().toString())
 
         if (unconsumedMove) {
           if (
