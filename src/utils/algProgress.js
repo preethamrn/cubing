@@ -116,7 +116,8 @@ function coalesceMoves(moves) {
 export function analyzeAlgProgress(initialPattern, processedAlg, events) {
   const expectedMoves = processedAlg.map(({ move }) => move)
   const inputMoves = events.map((event) => event.latestAlgLeaf ?? event.move)
-  const followsTargetPrefix = inputMoves.length <= expectedMoves.length &&
+  const hasVirtualMoves = processedAlg.some(({ rotation }) => rotation)
+  const followsTargetPrefix = !hasVirtualMoves && inputMoves.length <= expectedMoves.length &&
     inputMoves.every((move, index) => move instanceof Move && move.isIdentical(expectedMoves[index]))
 
   if (followsTargetPrefix) {
@@ -143,20 +144,7 @@ export function analyzeAlgProgress(initialPattern, processedAlg, events) {
   let partialMoves = []
   const movesToExecute = []
 
-  for (const event of events) {
-    const inputMove = event.latestAlgLeaf ?? event.move
-    if (!(inputMove instanceof Move)) continue
-
-    const nextStep = processedAlg[scrambleIndex]
-    const mappedFamily = nextStep?.mapping?.[inputMove.family]
-    const actualMove = mappedFamily
-      ? new Move(mappedFamily, inputMove.amount)
-      : inputMove
-
-    puzzlePattern = puzzlePattern.applyAlg(actualMove.toString())
-    movesToExecute.push({ latestMove: actualMove, timeStamp: event.timeStamp })
-
-    let unconsumedMove = actualMove
+  function advanceExpectedSteps(unconsumedMove, timeStamp) {
     while (scrambleIndex < processedAlg.length) {
       const step = processedAlg[scrambleIndex]
       const expectedStep = step.rotation
@@ -169,7 +157,7 @@ export function analyzeAlgProgress(initialPattern, processedAlg, events) {
         if (step.rotation) {
           scramblePattern = scramblePattern.applyAlg(step.rotation.toString())
           puzzlePattern = puzzlePattern.applyAlg(step.rotation.toString())
-          movesToExecute.push({ latestMove: step.rotation, timeStamp: event.timeStamp })
+          movesToExecute.push({ latestMove: step.rotation, timeStamp })
         }
 
         incorrectMoves = []
@@ -192,6 +180,25 @@ export function analyzeAlgProgress(initialPattern, processedAlg, events) {
         break
       }
     }
+  }
+
+  // Rotations do not emit face-turn events from a smart cube. Consume any
+  // rotation-equivalent prefix before trying to match the first physical turn.
+  advanceExpectedSteps(null, events[0]?.timeStamp)
+
+  for (const event of events) {
+    const inputMove = event.latestAlgLeaf ?? event.move
+    if (!(inputMove instanceof Move)) continue
+
+    const nextStep = processedAlg[scrambleIndex]
+    const mappedFamily = nextStep?.mapping?.[inputMove.family]
+    const actualMove = mappedFamily
+      ? new Move(mappedFamily, inputMove.amount)
+      : inputMove
+
+    puzzlePattern = puzzlePattern.applyAlg(actualMove.toString())
+    movesToExecute.push({ latestMove: actualMove, timeStamp: event.timeStamp })
+    advanceExpectedSteps(actualMove, event.timeStamp)
   }
 
   const correct = processedAlg.map(({ move }) => move).slice(0, scrambleIndex)

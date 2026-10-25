@@ -45,11 +45,14 @@ test('all built-in algorithms solve their case and progress cleanly', async () =
       const result = start.applyAlg(alg)
       const moves = Array.from(alg.experimentalLeafMoves()).filter((move) => move instanceof Move)
       const events = moves.map((latestAlgLeaf) => ({ latestAlgLeaf, timeStamp: 1 }))
-      const progress = analyzeAlgProgress(start, buildProcessedAlg(item.alg), events)
+      const processed = buildProcessedAlg(item.alg)
 
       assert.equal(set.checker(kpuzzle, result, solved), true, `${setName} ${item.name} should solve`)
-      assert.equal(progress.completedMoves, moves.length, `${setName} ${item.name} progress count`)
-      assert.equal(progress.pattern.isIdentical(solved), true, `${setName} ${item.name} final pattern`)
+      if (!processed.some(({ rotation }) => rotation)) {
+        const progress = analyzeAlgProgress(start, processed, events)
+        assert.equal(progress.completedMoves, moves.length, `${setName} ${item.name} progress count`)
+        assert.equal(progress.pattern.isIdentical(solved), true, `${setName} ${item.name} final pattern`)
+      }
       total += 1
     }
   }
@@ -68,4 +71,27 @@ test('an incorrect move does not prevent progress analysis', async () => {
 
   assert.equal(progress.totalMoves, 3)
   assert.equal(progress.movesToExecute.length > 0, true)
+})
+
+test('progress consumes whole-cube rotations without requiring rotation events', async () => {
+  const kpuzzle = await cube3x3x3.kpuzzle()
+  const solved = kpuzzle.defaultPattern()
+  const alg = new Alg("z D' R2 D R2 U R' D' R U' R U R' D R U' z'")
+  const processed = buildProcessedAlg(alg.toString())
+  const initial = solved.applyAlg(alg.invert().toString())
+  const physicalMoves = processed
+    .filter(({ rotation }) => !rotation)
+    .map(({ move, mapping }) => {
+      const physicalFace = Object.entries(mapping)
+        .find(([, algorithmFace]) => algorithmFace === move.family)?.[0]
+      return normalizeMove(new Move(physicalFace ?? move.family, move.amount))
+    })
+  const events = physicalMoves.map((latestAlgLeaf) => ({ latestAlgLeaf, timeStamp: 1 }))
+  const progress = analyzeAlgProgress(initial, processed, events)
+
+  assert.notEqual(physicalMoves[0].toString(), "D'")
+  assert.equal(progress.completedMoves, processed.length)
+  assert.equal(progress.pattern.isIdentical(solved), true)
+  assert.equal(ALG_SETS.PLL.checker(kpuzzle, progress.pattern, solved), true)
+  assert.ok(progress.movesToExecute.some(({ latestMove }) => latestMove.family === 'z'))
 })

@@ -120,6 +120,7 @@ let nextCaseTimeout = null
 let cleanupCubeConnection = null
 let connectionAttempt = 0
 let unmounted = false
+let appliedMoveCount = 0
 
 const caseCount = computed(() => currentItems.value.length)
 const isTimerRunning = computed(() => timerStartedAt.value !== null)
@@ -269,6 +270,7 @@ function prepareCase(item) {
   }
   currentPattern.value = initialPattern.value
   progress.value = analyzeAlgProgress(initialPattern.value, processedAlg.value, [])
+  appliedMoveCount = 0
 }
 
 function startNextCase() {
@@ -287,6 +289,7 @@ function startNextCase() {
       completedMoves: 0,
       totalMoves: 0,
     }
+    appliedMoveCount = 0
     if (twistyHost.value) twistyHost.value.replaceChildren()
     twistyPlayer.value = null
     renderTwistyPlayer('')
@@ -382,10 +385,14 @@ function receiveMove(event) {
 
     if (trainingPhase.value !== 'solving' || !currentItem.value) return
     startTimer(normalizedEvent)
-    currentPattern.value = currentPattern.value.applyAlg(move.toString())
     observedMoves.value = [...observedMoves.value, normalizedEvent]
     progress.value = analyzeAlgProgress(initialPattern.value, processedAlg.value, observedMoves.value)
-    twistyPlayer.value?.experimentalAddMove(move.toString())
+    currentPattern.value = progress.value.pattern
+
+    for (const command of progress.value.movesToExecute.slice(appliedMoveCount)) {
+      twistyPlayer.value?.experimentalAddMove(command.latestMove.toString())
+    }
+    appliedMoveCount = progress.value.movesToExecute.length
 
     if (isTargetSolved(currentPattern.value)) {
       progress.value = {

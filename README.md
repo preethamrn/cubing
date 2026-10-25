@@ -33,7 +33,8 @@ The production build is written to `dist/`. The existing `deploy.sh` publishes t
 
 ### Browser regression tests
 
-These verify the actual cube canvas on desktop and mobile, including case changes and resets:
+These verify the actual cube canvas, Bluetooth setup failures, face-turn delivery, and V-perm progress
+through cube rotations on desktop and mobile:
 
 ```sh
 npx playwright install --with-deps chromium

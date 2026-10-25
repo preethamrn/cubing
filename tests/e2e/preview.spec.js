@@ -58,6 +58,38 @@ test('incoming moves update the preview and record a completed solve', async ({ 
   await expectRenderedCube(page)
 })
 
+test('rotated V-perm progress follows smart-cube face turns without rotation events', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('algTrainerSettings', JSON.stringify({
+      algSet: 'PLL', selector: 'custom', timer: 'browser', waitTime: 3000,
+    }))
+    localStorage.setItem('customAlgSet', JSON.stringify({ name: 'PLL', list: [18] }))
+    localStorage.removeItem('timesList')
+  })
+
+  await page.goto('algtrainer')
+  await expect(page.locator('.alg-case-name')).toHaveText('V')
+  await expectRenderedCube(page)
+
+  const physicalTurns = [
+    ['R', -1], ['U', 2], ['R', 1], ['U', 2], ['L', 1],
+    ['U', -1], ['R', -1], ['U', 1], ['L', -1], ['U', 1],
+    ['L', 1], ['U', -1], ['R', 1], ['U', 1], ['L', -1],
+  ]
+
+  for (const [face, amount] of physicalTurns) {
+    const key = amount === -1 ? `Shift+${face}` : face.toLowerCase()
+    for (let turn = 0; turn < Math.abs(amount); turn += 1) {
+      await page.keyboard.press(key)
+    }
+    await expect(page.locator('.move-incorrect')).toHaveText('')
+  }
+
+  await expect(page.locator('.history-row')).toHaveCount(1)
+  await expect(page.locator('.notice-error')).toHaveCount(0)
+  await expectRenderedCube(page)
+})
+
 test('GATT setup failure leaves the preview usable and allows another connection attempt', async ({ page }) => {
   await page.addInitScript(() => {
     const device = new EventTarget()
