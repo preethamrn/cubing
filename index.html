@@ -1,11 +1,33 @@
-<!DOCTYPE html><html lang=en><head><script async src="https://www.googletagmanager.com/gtag/js?id=UA-175017061-1"></script><script>window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'UA-175017061-1');</script><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=/cubing/favicon.ico><title>preethamrn</title><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Muli:300,400,400i,600,600i,700,700i,900,900i"><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Material+Icons"><link href=https://use.fontawesome.com/releases/v5.0.13/css/all.css rel=stylesheet><script>(function(){
-        var redirect = sessionStorage.redirect;
-        delete sessionStorage.redirect;
-        if (redirect && redirect != location.href) {
-          history.replaceState(null, null, redirect);
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0f14" />
+    <meta
+      name="description"
+      content="A set of tools for cubers: algorithm practice, blindfold memo training, and competition result medians."
+    />
+    <link rel="icon" href="/cubing/favicon.ico" />
+    <title>Cubing Lab</title>
+    <script>
+      const redirect = sessionStorage.getItem('redirect')
+      sessionStorage.removeItem('redirect')
+      if (redirect) {
+        try {
+          const target = new URL(redirect, location.origin)
+          if (target.origin === location.origin) {
+            history.replaceState(null, '', `${target.pathname}${target.search}${target.hash}`)
+          }
+        } catch {
+          // Ignore an invalid redirect left in session storage.
         }
-      })();</script><link href=/cubing/css/chunk-27ead5b2.0a99b966.css rel=prefetch><link href=/cubing/css/chunk-597b3f45.a539a454.css rel=prefetch><link href=/cubing/css/chunk-bc5c8e86.64ab5925.css rel=prefetch><link href=/cubing/css/chunk-c1db0a0a.d8a52240.css rel=prefetch><link href=/cubing/css/chunk-ddefb39a.bec3d2d0.css rel=prefetch><link href=/cubing/js/chunk-27ead5b2.7b93b0be.js rel=prefetch><link href=/cubing/js/chunk-597b3f45.51d517f9.js rel=prefetch><link href=/cubing/js/chunk-bc5c8e86.cd871426.js rel=prefetch><link href=/cubing/js/chunk-c1db0a0a.e183a697.js rel=prefetch><link href=/cubing/js/chunk-ddefb39a.f5cfe49c.js rel=prefetch><link href=/cubing/css/app.4b7102ee.css rel=preload as=style><link href=/cubing/css/chunk-vendors.a728f495.css rel=preload as=style><link href=/cubing/js/app.56ee60c4.js rel=preload as=script><link href=/cubing/js/chunk-vendors.a2356781.js rel=preload as=script><link href=/cubing/css/chunk-vendors.a728f495.css rel=stylesheet><link href=/cubing/css/app.4b7102ee.css rel=stylesheet></head><body><noscript><strong>We're sorry but preethamrn.com doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id=app></div><script src=/cubing/js/chunk-vendors.a2356781.js></script><script src=/cubing/js/app.56ee60c4.js></script></body></html>
+      }
+    </script>
+    <script type="module" crossorigin src="/cubing/assets/index-ChBWYCTk.js"></script>
+    <link rel="stylesheet" crossorigin href="/cubing/assets/index-QIulI-69.css">
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
